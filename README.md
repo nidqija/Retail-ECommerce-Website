@@ -45,7 +45,10 @@ Launch the application using the .NET CLI:
 ```bash
 dotnet run
 ```
- 
+OR 
+```bash
+dotnet watch  run
+```
 **Note:** The application will typically listen on `http://localhost:5001`. Check the console output for the specific port.
  
 ## 📂 Project Overview
