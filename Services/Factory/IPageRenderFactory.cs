@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+namespace RetailECommerce.Services.Factory;
 
-namespace RetailECommerce.Services;
 
-// abstract factory interface for rendering pages
+//
+// Factory Interface: Defines the method to get the appropriate page handler
 public interface IPageRenderFactory
 {
-    IActionResult RenderPage(string pageName);
+    IPageHandler GetHandler(string pageName , Controller controller);
 }
+
+   
+
+
