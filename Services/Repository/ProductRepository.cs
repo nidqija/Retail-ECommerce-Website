@@ -30,7 +30,14 @@ public class ProductRepository : IProductRepository
 
     public Product GetProductById(int id)
     {
-        return _context.Products.Find(id);
+        var product = _context.Products.Find(id);
+        
+        if (product == null)
+        {
+            throw new Exception("Product not found");
+        }
+
+        return product;
     }
 
     public void AddProduct(Product product)
