@@ -1,12 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+using RetailECommerce.Services.Repository;
 using RetailECommerce.Services.Factory;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+
+builder.Services.AddDbContext<MyDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IPageRenderFactory, PageHandlerFactory>();
+
+
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<RetailECommerce.Services.Factory.IPageRenderFactory, RetailECommerce.Services.Factory.PageHandlerFactory>();
 
 var app = builder.Build();
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -20,8 +33,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-
-
 
 app.MapControllerRoute(
     name: "default",
