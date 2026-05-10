@@ -5,15 +5,15 @@ using RetailECommerce.Services.Factory;
 
 namespace RetailECommerce.Controllers;
 
-
-public class HomeController : Controller
+// This controller handles the sign-up page requests
+public class SignUpController : Controller
 {
     private readonly IPageRenderFactory _factory;
 
-    public HomeController(IPageRenderFactory factory) => _factory = factory;
+    public SignUpController(IPageRenderFactory factory) => _factory = factory;
 
     public IActionResult Index() 
     {
-        return _factory.GetHandler("home", this).Render(this);
+        return _factory.GetHandler("signup", this).Render(this);
     }
 }

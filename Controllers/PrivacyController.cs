@@ -7,22 +7,13 @@ namespace RetailECommerce.Controllers;
 
 public class PrivacyController : Controller
 {
-    private readonly IPageRenderFactory _pageRenderFactory;
+    private readonly IPageRenderFactory _factory;
 
-    public PrivacyController(IPageRenderFactory pageRenderFactory)
-    {
-        _pageRenderFactory = pageRenderFactory;
-    }
+    public PrivacyController(IPageRenderFactory factory) => _factory = factory;
 
-    public IActionResult Index()
+    public IActionResult Index() 
     {
-        return _pageRenderFactory.GetHandler("Index", this).Render(this);
-    }
-
-    
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        // this index method returns the privacy page view using the factory to get the correct handler
+        return _factory.GetHandler("privacy", this).Render(this);
     }
 }

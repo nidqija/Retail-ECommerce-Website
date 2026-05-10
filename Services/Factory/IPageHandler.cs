@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 namespace RetailECommerce.Services.Factory;
 
-
+// abstract product interface for page handlers
 public interface IPageHandler
 {
     // The handler performs the action and returns the result
@@ -22,7 +22,22 @@ public class PrivacyPageHandler : IPageHandler
 {
     public IActionResult Render(Controller controller)
     {
-        // Solving your path issue: Redirecting to the correct view location
+        return controller.View("Index");
+    }
+}
+
+public class SignUpPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("Index");
+    }
+}
+
+public class SignInPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
         return controller.View("Index");
     }
 }
