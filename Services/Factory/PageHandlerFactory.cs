@@ -11,6 +11,8 @@ public class PageHandlerFactory : IPageRenderFactory
         {
             "index" => new IndexPageHandler(),
             "privacy" => new PrivacyPageHandler(),
+            "signup" => new SignUpPageHandler(),
+            "signin" => new SignInPageHandler(),
             _ => new IndexPageHandler()
         };
     }
