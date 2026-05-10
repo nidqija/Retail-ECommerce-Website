@@ -1,12 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In Page</title>
-</head>
-<body>
-    <h1>Sign In</h1>
-    <p>This is the sign in page.</p>
-</body>
-</html>
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<section class="auth-page sign-in-page">
+    <div class="auth-backdrop"></div>
+    <div class="auth-card shell-card">
+        <div class="auth-copy">
+            <p class="auth-kicker">RetailECommerce</p>
+            <h1>Welcome back</h1>
+            <p class="auth-subtitle">Sign in to continue managing your store, orders, and customers.</p>
+
+            <div class="auth-highlights">
+                <div>
+                    <span class="highlight-number">24/7</span>
+                    <span class="highlight-label">store access</span>
+                </div>
+                <div>
+                    <span class="highlight-number">Fast</span>
+                    <span class="highlight-label">secure checkout</span>
+                </div>
+                <div>
+                    <span class="highlight-number">Live</span>
+                    <span class="highlight-label">inventory insights</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-header">
+                <p class="section-label">Sign In</p>
+                <h2>Access your account</h2>
+                <p>Enter your credentials to resume where you left off.</p>
+            </div>
+
+            <form class="auth-form" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control form-control-lg" placeholder="yourname" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+                </div>
+
+                <div class="auth-actions">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" />
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 auth-submit mb-2">Sign In</button>
+
+                <p class="p-2 text-center">or</p>
+
+                <button type="button" class="btn btn-primary btn-lg w-100 auth-submit mb-2">Sign In with Google</button>
+
+                <button type="button" class="btn btn-primary btn-lg w-100 auth-submit">Sign In with Facebook</button>
+            </form>
+
+            <p class="auth-footer">New here? <a asp-controller="SignUp" asp-action="Index">Create an account</a></p>
+        </div>
+    </div>
+</section>
