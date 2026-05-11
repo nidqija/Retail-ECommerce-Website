@@ -17,7 +17,11 @@ public class MyDbContext : DbContext
             .WithMany(u => u.Notifications)
             .HasForeignKey(n => n.UserId);
 
+        
+
     }
+
+
 
     // declare product model to create a table in the database and perform crud operations on it
     // be sure to declare the other model here as well to create the tables in the db

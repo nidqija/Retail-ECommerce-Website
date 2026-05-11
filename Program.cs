@@ -11,12 +11,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlite(connectionString));
 
-
+// register the services in the dependency injection container to be used in the controllers
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPageRenderFactory, PageHandlerFactory>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache(); // Required for Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // How long the user stays logged in
+    options.Cookie.HttpOnly = true; // Security: prevents JS from reading the cookie
+    options.Cookie.IsEssential = true; // Required to work even if the user hasn't accepted cookies
+});
 
 var app = builder.Build();
 
@@ -29,6 +36,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseSession(); // Enable session middleware
 
 app.UseAuthorization();
 
