@@ -13,7 +13,6 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 
 // register the services in the dependency injection container to be used in the controllers
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IPageRenderFactory, PageHandlerFactory>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllersWithViews();

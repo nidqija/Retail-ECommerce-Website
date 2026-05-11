@@ -7,13 +7,11 @@ namespace RetailECommerce.Controllers;
 
 public class PrivacyController : Controller
 {
-    private readonly IPageRenderFactory _factory;
-
-    public PrivacyController(IPageRenderFactory factory) => _factory = factory;
-
+    // this method returns the privacy page view using the factory to get the correct handler
     public IActionResult Index() 
     {
         // this index method returns the privacy page view using the factory to get the correct handler
-        return _factory.GetHandler("privacy", this).Render(this);
+        PageCreator pageCreator = new PrivacyPageCreator();
+        return pageCreator.RenderPage(this);
     }
 }
