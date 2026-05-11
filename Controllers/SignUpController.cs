@@ -9,19 +9,18 @@ namespace RetailECommerce.Controllers;
 // This controller handles the sign-up page requests
 public class SignUpController : Controller
 {
-    private readonly IPageRenderFactory _factory;
     private readonly IUserService _userService;
 
     // constructor injection of factory and user service to handle page rendering and user registration logic
-    public SignUpController(IPageRenderFactory factory , IUserService userService)
+    public SignUpController(IUserService userService)
     {
-        _factory = factory;
         _userService = userService;
     }
 
     public IActionResult Index() 
     {
-        return _factory.GetHandler("signup", this).Render(this);
+        PageCreator pageCreator = new SignUpPageCreator();
+        return pageCreator.RenderPage(this);
     }
 
     // This method handles the POST request for user registration

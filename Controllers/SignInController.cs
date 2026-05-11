@@ -6,18 +6,17 @@ namespace RetailECommerce.Controllers;
 // This controller handles the sign-in page requests
 public class SignInController : Controller
 {
-    private readonly IPageRenderFactory _factory;
     private readonly IUserService _userService;
 
-    public SignInController(IPageRenderFactory factory , IUserService userService) {
-            _factory = factory;
+    public SignInController(IUserService userService) {
             _userService = userService;
     } 
 
     public IActionResult Index() 
     {
         // One line: Logic and View selection happen in the Factory folder
-        return _factory.GetHandler("signin", this).Render(this);
+        PageCreator pageCreator = new SignInPageCreator();
+        return pageCreator.RenderPage(this);
     }
 
 
