@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -30,12 +32,27 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Dashboard</a>
                         </li>
                     </ul> <ul class="navbar-nav ms-auto order-1 order-sm-2">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="SignUp" asp-action="Index">Sign Up</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="SignIn" asp-action="Index">Sign In</a>
-                        </li>
+
+                        @{
+                            var userName = Context.Session.GetString("UserEmail");
+                        }
+                            @if (userName != null)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                </li>
+                            }
+
+                            else {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="SignUp" asp-action="Index">Sign Up</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="SignIn" asp-action="Index">Sign In</a>
+                            </li>
+                        }
+                        
+                      
                     </ul>
                 </div>
             </div>

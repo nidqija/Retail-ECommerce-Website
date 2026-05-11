@@ -33,20 +33,28 @@
                 <p>Fill in the details below to get started.</p>
             </div>
 
-            <form class="auth-form" method="post">
+            @model RetailECommerce.Models.User
+            <form class="auth-form" method="post" asp-action="Register" asp-controller="SignUp">
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-control form-control-lg" placeholder="yourname@example.com" required>
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" type="email" id="email" name="email" class="form-control form-control-lg" placeholder="yourname@example.com" required>
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
             
                 <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" name="username" class="form-control form-control-lg" placeholder="yourname" required>
+                    <label asp-for="FullName" class="form-label">Full Name</label>
+                    <input asp-for="FullName" type="text" id="fullname" name="fullname" class="form-control form-control-lg" placeholder="Your Full Name" required>
+                    <span asp-validation-for="FullName" class="text-danger"></span> 
                 </div>
 
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
+
                 </div>
 
                 <div class="auth-actions">
@@ -64,3 +72,9 @@
         </div>
     </div>
 </section>
+
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

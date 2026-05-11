@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
+using RetailECommerce.Services.Repository;
 
 namespace RetailECommerce.Controllers;
 
@@ -9,11 +10,42 @@ namespace RetailECommerce.Controllers;
 public class SignUpController : Controller
 {
     private readonly IPageRenderFactory _factory;
+    private readonly IUserService _userService;
 
-    public SignUpController(IPageRenderFactory factory) => _factory = factory;
+    // constructor injection of factory and user service to handle page rendering and user registration logic
+    public SignUpController(IPageRenderFactory factory , IUserService userService)
+    {
+        _factory = factory;
+        _userService = userService;
+    }
 
     public IActionResult Index() 
     {
         return _factory.GetHandler("signup", this).Render(this);
     }
+
+    // This method handles the POST request for user registration
+    [HttpPost]
+    public async Task<IActionResult> Register(User user)
+    {
+        if (ModelState.IsValid)
+        {
+            bool isRegistered = await _userService.RegisterUserAsync(user);
+            if (isRegistered)
+            {
+            
+                Console.WriteLine("User registered successfully.");
+                return RedirectToAction("Index", "SignIn");
+                 }
+            else {
+                Console.WriteLine("Registration failed. Email already exists.");
+                ModelState.AddModelError("", "Email already exists. Please use a different email.");
+                return View("Index", user);
+                }
+        }
+        return View("Index", user);
+    }
+
+
+    
 }
