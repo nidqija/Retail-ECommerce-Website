@@ -38,7 +38,29 @@ To run the project over HTTPS without browser security warnings, trust the .NET 
 dotnet dev-certs https --trust
 ```
  
-### 4. Run the Project
+### 4. Setup Database Migrations
+ 
+If the project uses Entity Framework Core, apply pending database migrations:
+ 
+```bash
+# Apply migrations to create/update the database
+dotnet ef database update
+```
+ 
+**Optional:** If you need to create a new migration after model changes:
+ 
+```bash
+# Create a new migration
+dotnet ef migrations add MigrationName
+ 
+# Remove the last migration (if needed)
+dotnet ef migrations remove
+ 
+# List all migrations
+dotnet ef migrations list
+```
+ 
+### 5. Run the Project
  
 Launch the application using the .NET CLI:
  
@@ -47,7 +69,7 @@ dotnet run
 ```
 OR 
 ```bash
-dotnet watch  run
+dotnet watch run
 ```
 **Note:** The application will typically listen on `http://localhost:5001`. Check the console output for the specific port.
  
@@ -66,6 +88,7 @@ dotnet watch  run
 - **Routing:** This project uses `[Route("path")]` attributes on controllers for SEO-friendly URLs.
 - **Factory Method:** Used in page rendering to dynamically select view templates based on product categories.
 - **Git Ignore:** The `bin/`, `obj/`, and `appsettings.Development.json` files are ignored to keep the repository clean and secure.
+
 ## 🆘 Troubleshooting
  
 If the project does not compile or packages seem broken, try a hard clean:
@@ -77,4 +100,3 @@ dotnet clean
 # Force a rebuild
 dotnet build
 ```
- 

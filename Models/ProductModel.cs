@@ -1,11 +1,25 @@
 namespace RetailECommerce.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 public class Product
 {
-    public int Id { get; set; }
+    
+    [Key]
+    public int ProductId { get; set; }
+
+    [Required]
+    [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(250)]
     public string Description { get; set; } = string.Empty;
+
+    [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
+
+    [Required]
     public int StockQuantity { get; set; }
 }
