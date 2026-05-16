@@ -41,3 +41,13 @@ public class SignInPageHandler : IPageHandler
         return controller.View("Index");
     }
 }
+
+public class AdminDashboardPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("Index");
+    }
+}
+
+

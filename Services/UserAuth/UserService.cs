@@ -1,6 +1,7 @@
 namespace RetailECommerce.Services.Repository;
 using RetailECommerce.Models;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 
 public class UserService : IUserService
@@ -12,11 +13,12 @@ public class UserService : IUserService
  
     // registers a new user in the database
     // checks if the email is unique before registering the user
-    public async Task<bool> RegisterUserAsync(User user)
+    public async Task<bool> RegisterUserAsync(User user , string password)
     {
         if (!IsEmailUnique(user.Email))
             return false;
-
+        
+        user.Password = BCrypt.HashPassword(password);
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return true;
@@ -33,7 +35,12 @@ public class UserService : IUserService
     // retrieves a user from the database based on the provided email and password
     public async Task<User?> AuthenticateUserAsync(string email, string password)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user != null && BCrypt.Verify(password, user.Password))
+        {
+            return user;
+        }
+        return null;
     }
    
 
