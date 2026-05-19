@@ -36,3 +36,19 @@ public class SignInPageCreator : PageCreator
         return new SignInPageHandler();
     }
 }
+
+public class ReportPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new ReportPageHandler();
+    }
+}
+
+public class AdminHomePageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new AdminHomePageHandler();
+    }
+}

@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using RetailECommerce.Services.Repository;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Data;
+using RetailECommerce.Services.Strategy.Report;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-
+QuestPDF.Settings.License = LicenseType.Community;
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -15,6 +17,8 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 // register the services in the dependency injection container to be used in the controllers
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache(); // Required for Session
@@ -61,6 +65,8 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<MyDbContext>();
 
         await DataSeeder.SeedAdminAsync(context);
+        await DataSeeder.SeedProductAsync(context);
+        
     }
     catch (Exception ex)
     {

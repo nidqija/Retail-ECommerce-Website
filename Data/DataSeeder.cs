@@ -29,4 +29,31 @@ public class DataSeeder
             Console.WriteLine("Admin already exist in the database. Skipping seeding.");
         }
     }
+
+
+    public static async Task SeedProductAsync(MyDbContext context)
+    {
+        // Ensure the database is created
+        await context.Database.MigrateAsync();
+
+        // Check if there are any products in the database
+        if (!context.Products.Any())
+        {
+            var products = new List<Product>
+            {
+                new Product { Name = "Red Shirt", Description = "A comfortable red shirt", Price = 19.99m, StockQuantity = 10 },
+                new Product { Name = "Blue Jeans", Description = "Stylish blue jeans", Price = 49.99m, StockQuantity = 20 },
+                new Product { Name = "Black Shoes", Description = "Elegant black shoes", Price = 79.99m, StockQuantity = 15 },
+                new Product { Name = "White Hat", Description = "Simple white hat", Price = 14.99m, StockQuantity = 12 }
+            };
+
+            context.Products.AddRange(products);
+            await context.SaveChangesAsync();
+        } else
+        {
+            Console.WriteLine("Products already exist in the database. Skipping seeding.");
+        }
+    }
+
+    
 }
