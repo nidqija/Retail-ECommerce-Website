@@ -18,6 +18,8 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
+builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
+builder.Services.AddScoped<ReportContext>();
 
 
 builder.Services.AddControllersWithViews();

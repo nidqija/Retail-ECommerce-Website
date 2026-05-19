@@ -1,6 +1,8 @@
 namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
+using RetailECommerce.Services.Factory.Report;
 using RetailECommerce.Services.Strategy.Report;
 
 
@@ -10,12 +12,13 @@ using RetailECommerce.Services.Strategy.Report;
 public class ReportController : Controller
 {
 
-   private readonly IReportStrategy _reportStrategy;
+   private readonly IEnumerable<IReportStrategy> _reportStrategies;
+   private readonly MyDbContext _context;
 
-    public ReportController(IReportStrategy reportStrategy)
+    public ReportController(IEnumerable<IReportStrategy> reportStrategies, MyDbContext context)
     {
-        _reportStrategy = reportStrategy;
-    
+        _reportStrategies = reportStrategies;
+        _context = context;
     }
 
 
@@ -30,23 +33,61 @@ public class ReportController : Controller
     // iactionresult is used to generate report based on the strategy pattern
     // this method is from microsoft asp.net core mvc framework
     // it is used to handle the post request from the report page
-    public IActionResult GenerateReport(string reportType)
+
+    
+    public IActionResult GenerateReport(string reportType , string dataType)
     {
 
         try
         {
-           // generate the report using the strategy pattern
-           byte[] reportData = _reportStrategy.generateReport(reportType);
+           if (string.IsNullOrEmpty(reportType))
+            {
+                return BadRequest("Report type is required.");
+            } 
 
-            // return the file to the user device for auto download
-            return File(reportData, "application/pdf", "ProductReport.pdf");
+            ReportFactory reportFactory = new ReportFactory(_context);
+            IReportData reportData = reportFactory.GetReportData(dataType);
 
+            ReportData data = reportData.MapData();
+            var activeStrategy = _reportStrategies.FirstOrDefault(s => s.reportType.Equals(reportType, StringComparison.OrdinalIgnoreCase));
+
+            if (activeStrategy == null)
+            {
+                return BadRequest("Invalid report type.");
+            }
+
+            byte[] reportBytes = activeStrategy.generateReport(data);   
+
+            GetContentType(reportType);          
+
+            return File(reportBytes, GetContentType(reportType), $"{reportType}_Report.{GetFileExtension(reportType)}");
+            
         } catch (ArgumentException ex)
         {
             // handle invalid report type error
             return BadRequest(ex.Message);
         }
         
+    }
+
+    private string GetContentType(string reportType)
+    {
+        return reportType switch
+        {
+            "PDF" => "application/pdf",
+            "CSV" => "text/csv",
+            _ => "application/octet-stream"
+        };
+    }
+
+    private string GetFileExtension(string reportType)
+    {
+        return reportType switch
+        {
+            "PDF" => "pdf",
+            "CSV" => "csv",
+            _ => "dat"
+        };
     }
 
 

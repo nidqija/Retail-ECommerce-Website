@@ -1,5 +1,4 @@
 namespace RetailECommerce.Services.Strategy.Report;
-using Microsoft.EntityFrameworkCore;
 using RetailECommerce.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
@@ -16,21 +15,20 @@ public class PDFReportStrategy : IReportStrategy
     public PDFReportStrategy(MyDbContext context)
     {
         _context = context;
+        QuestPDF.Settings.License = LicenseType.Community;
     }
     
 
-    // separate the method to get the product data from the database and questpdf to keep the code clean and maintainable
-    public List<string> GetProductReportData()
-    {
-        return _context.Products.Select(p => p.Name).ToList();
-    }
+    
+
+    
 
     // this method generates a pdf report based on the product data in the database using the questpdf library
-    public byte[] generateReport(string reportType)
+    public byte[] generateReport(ReportData reportData)
     {
-        if (reportType != "PDF")
+        if (this.reportType != "PDF")
         {
-            throw new ArgumentException("Invalid report type.");
+            throw new InvalidOperationException("Invalid report type for PDFReportStrategy");
         } else
         {
          return Document.Create(container =>
@@ -45,32 +43,44 @@ public class PDFReportStrategy : IReportStrategy
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            // create columns
-                            columns.RelativeColumn(2); 
-                            columns.RelativeColumn(1);
-                            columns.RelativeColumn(1);
+                            foreach (var header in reportData.Headers)
+                            {
+                                columns.RelativeColumn();
+                            }
                         });
 
-                        table.Cell().Text("Product Name").FontSize(14).Bold();
-                        table.Cell().Text("Price").FontSize(14).Bold();
-                        table.Cell().Text("Stock Quantity").FontSize(14).Bold();
-
-
-                        foreach (var product in _context.Products.ToList())
+                       table.Header(header =>
+                    {
+                        foreach (var headerText in reportData.Headers)
                         {
-                            table.Cell().Text(product.Name);
-                            table.Cell().Text($"${product.Price}");
-                            table.Cell().Text(product.StockQuantity.ToString());
+                            header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(headerText).FontSize(14).Bold();
                         }
                     });
+
+                    foreach (var row in reportData.Rows)
+                        {
+                            foreach (var cell in row)
+                            {
+                                
+                                string cleanContent = cell ?? string.Empty;
+                                
+                                table.Cell()
+                                     .BorderBottom(0.5f)
+                                     .BorderColor(Colors.Grey.Lighten1)
+                                     .Padding(5)
+                                     .Text(cleanContent)
+                                     .FontSize(12);
+                            }
+                        }
+                  });
                     
                 });
             }).GeneratePdf();
             
+   
+
         }
     }
-
-
 }
 
 

@@ -1,3 +1,5 @@
+using RetailECommerce.Models;
+
 namespace RetailECommerce.Services.Strategy.Report;
 
 // this interface is an Abstract Strategy
@@ -6,10 +8,9 @@ public interface IReportStrategy
 {
     string reportType { get; }
 
-    byte[] generateReport(string reportType);
+    byte[] generateReport(ReportData reportData);
 
 
-    List<string> GetProductReportData();
 
 
 }

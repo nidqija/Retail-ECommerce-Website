@@ -6,7 +6,6 @@
     <title>Admin Report Page</title>
 </head>
 <body>
-    <!-- Bootstrap Floating Success Notification (Kept outside the form for safety) -->
     
 
     <h1>This is the Admin Report Page</h1>
@@ -16,7 +15,6 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <!-- Native form: It passes parameters automatically on submission -->
     <form id="reportForm" asp-controller="Report" asp-action="GenerateReport" method="get">
         
         <label for="monthSelect">Select Month:</label>
@@ -36,14 +34,29 @@
         </select>
         
         <br><br>
-       
-        <button type="submit" name="reportType" value="PDF">Export Report as PDF</button>
-        <button type="submit" name="reportType" value="Excel">Export Report as Excel</button>
+        
+        <input type="hidden" name="reportType" value="" />
+        <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="ProductReport">Export Product Report as PDF</button>
+        <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="UserReport">Export User Report as PDF</button>
+
+        <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="ProductReport">Export Product Report as CSV</button>
+        <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="UserReport">Export User Report as CSV</button>
         
     </form>
+    
 
     @section Scripts {
         <script>
+            // add click event listeners to all buttons with class 'report-btn'
+            // this is used to set the value of the hidden input field 'reportType' to the data-format attribute of the clicked button
+            document.querySelectorAll('.report-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const reportType = this.getAttribute('data-format');
+                    document.querySelector('input[name="reportType"]').value = reportType;
+                });
+            });
+
+
             // Target the form submission event
             document.getElementById('reportForm').addEventListener('submit', function() {
                 const successNotification = document.getElementById('successNotification');
@@ -52,11 +65,10 @@
                 successNotification.classList.remove('d-none');
                 successNotification.classList.add('show');
 
-                // 2. Automatically hide the alert after 4 seconds
+                // 2. Automatically hide the alert 
                 setTimeout(() => {
                     successNotification.classList.remove('show');
                     
-                    // Allow 150ms for Bootstrap fade animation to end before applying display none
                     setTimeout(() => {
                         successNotification.classList.add('d-none');
                     }, 150);
