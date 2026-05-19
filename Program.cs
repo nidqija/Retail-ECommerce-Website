@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using RetailECommerce.Services.Repository;
 using RetailECommerce.Services.Factory;
+using RetailECommerce.Data;
+using RetailECommerce.Services.Strategy.Report;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-
+QuestPDF.Settings.License = LicenseType.Community;
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -14,6 +17,8 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 // register the services in the dependency injection container to be used in the controllers
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache(); // Required for Session
@@ -24,7 +29,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Required to work even if the user hasn't accepted cookies
 });
 
+
 var app = builder.Build();
+
 
 
 if (!app.Environment.IsDevelopment())
@@ -45,5 +52,26 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+
+// seed the database with a default admin user if no users exist
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    
+    try
+    {
+        // seed the database with a default admin user if no users exist
+        var context = services.GetRequiredService<MyDbContext>();
+
+        await DataSeeder.SeedAdminAsync(context);
+        await DataSeeder.SeedProductAsync(context);
+        
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while seeding the database: {ex.Message}");
+    }
+}
 
 app.Run();

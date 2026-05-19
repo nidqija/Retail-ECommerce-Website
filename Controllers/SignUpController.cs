@@ -25,11 +25,11 @@ public class SignUpController : Controller
 
     // This method handles the POST request for user registration
     [HttpPost]
-    public async Task<IActionResult> Register(User user)
+    public async Task<IActionResult> Register(User user , string password)
     {
         if (ModelState.IsValid)
         {
-            bool isRegistered = await _userService.RegisterUserAsync(user);
+            bool isRegistered = await _userService.RegisterUserAsync(user, password);
             if (isRegistered)
             {
             

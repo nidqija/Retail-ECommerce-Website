@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 namespace RetailECommerce.Controllers;
@@ -36,11 +37,22 @@ public class SignInController : Controller
         var user = await _userService.AuthenticateUserAsync(email, password);
         if (user != null)
         {
-            
+            // store user information in session to persist data across requests
+            //  and maintain user state
             HttpContext.Session.SetString("UserEmail", user.Email);
             HttpContext.Session.SetString("UserRole", user.Role.ToString());
 
             Console.WriteLine("User authenticated successfully.");
+            Console.WriteLine("User Password: " + user.Password);
+
+            if (user.Role == UserRole.Vendor)
+            {
+
+                
+                return RedirectToAction("Index", "AdminControllerFacade");
+            }
+             
+            
             return RedirectToAction("Index", "Home");
         }
         else
