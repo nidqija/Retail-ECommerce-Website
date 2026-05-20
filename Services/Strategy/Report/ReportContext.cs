@@ -1,4 +1,6 @@
 namespace RetailECommerce.Services.Strategy.Report;
+using Microsoft.EntityFrameworkCore;
+using RetailECommerce.Models;
 
 // this is the context class for the strategy pattern
 // it is used to call the report generation method from the strategy class
@@ -11,8 +13,8 @@ public class ReportContext
         _reportStrategy = reportStrategy;
     }
 
-    public void GenerateReport(string reportType)
+    public byte[] GenerateReport(ReportData reportData)
     {
-        _reportStrategy.generateReport(reportType);
+        return _reportStrategy.generateReport(reportData);
     }
 }
