@@ -1,80 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Report Page</title>
-</head>
-<body>
-    
-
-    <h1>This is the Admin Report Page</h1>
-
-    <div id="successNotification" class="alert alert-success alert-dismissible fade position-fixed top-0 end-0 m-3 d-none" role="alert" style="z-index: 1050;">
-        <strong>Success!</strong> Your report has been generated and download started.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <form id="reportForm" asp-controller="Report" asp-action="GenerateReport" method="get">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Report Page</title>
+    </head>
+    <body>
         
-        <label for="monthSelect">Select Month:</label>
-        <select id="monthSelect" name="month">
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-        </select>
-        
-        <br><br>
-        
-        <input type="hidden" name="reportType" value="" />
-        <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="ProductReport">Export Product Report as PDF</button>
-        <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="UserReport">Export User Report as PDF</button>
 
-        <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="ProductReport">Export Product Report as CSV</button>
-        <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="UserReport">Export User Report as CSV</button>
-        
-    </form>
-    
+        <h1 class="mt-4 mb-4">This is the Admin Report Page</h1>
 
-    @section Scripts {
-        <script>
-            // add click event listeners to all buttons with class 'report-btn'
-            // this is used to set the value of the hidden input field 'reportType' to the data-format attribute of the clicked button
-            document.querySelectorAll('.report-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const reportType = this.getAttribute('data-format');
-                    document.querySelector('input[name="reportType"]').value = reportType;
+        <div id="successNotification" class="alert alert-success alert-dismissible fade position-fixed top-0 end-0 m-3 d-none" role="alert" style="z-index: 1050;">
+            <strong>Success!</strong> Your report has been generated and download started.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+
+        <div>
+            <hr>
+            <h2 class="mb-4">Payment Report</h2>
+            <form id="reportForm" asp-controller="Report" asp-action="GenerateReport" method="get">
+            <input type="hidden" name="reportType" value="" />
+
+            
+            <label for="monthSelect">Select Month:</label>
+            <select id="monthSelect" name="month" class="mb-5">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+            <br >
+            <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="PaymentReport">Export Payment Report as PDF</button>
+            <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="PaymentReport">Export Payment Report as CSV</button>
+
+            </form>
+            
+            <br><br>
+        </div>
+        <form id="reportForm" asp-controller="Report" asp-action="GenerateReport" method="get">
+            
+        
+            <h2 class="mb-4">Other Reports</h2>
+            <input type="hidden" name="reportType" value="" />
+            <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="ProductReport">Export Product Report as PDF</button>
+            <button type="submit" class="report-btn" name="dataType" data-format="PDF" value="UserReport">Export User Report as PDF</button>
+
+            <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="ProductReport">Export Product Report as CSV</button>
+            <button type="submit" class="report-btn" name="dataType" data-format="CSV" value="UserReport">Export User Report as CSV</button>
+            
+        </form>
+        
+
+        @section Scripts {
+            <script>
+                // add click event listeners to all buttons with class 'report-btn'
+                // this is used to set the value of the hidden input field 'reportType' to the data-format attribute of the clicked button
+                document.querySelectorAll('.report-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const reportType = this.getAttribute('data-format');
+                        document.querySelector('input[name="reportType"]').value = reportType;
+                    });
                 });
-            });
 
 
-            // Target the form submission event
-            document.getElementById('reportForm').addEventListener('submit', function() {
-                const successNotification = document.getElementById('successNotification');
-                
-                // 1. Reveal the alert instantly when clicked
-                successNotification.classList.remove('d-none');
-                successNotification.classList.add('show');
-
-                // 2. Automatically hide the alert 
-                setTimeout(() => {
-                    successNotification.classList.remove('show');
+                // Target the form submission event
+                document.getElementById('reportForm').addEventListener('submit', function() {
+                    const successNotification = document.getElementById('successNotification');
                     
+                    // 1. Reveal the alert instantly when clicked
+                    successNotification.classList.remove('d-none');
+                    successNotification.classList.add('show');
+
+                    // 2. Automatically hide the alert 
                     setTimeout(() => {
-                        successNotification.classList.add('d-none');
-                    }, 150);
-                }, 4000);
-            });
-        </script>
-    }
-</body>
-</html>
+                        successNotification.classList.remove('show');
+                        
+                        setTimeout(() => {
+                            successNotification.classList.add('d-none');
+                        }, 150);
+                    }, 4000);
+                });
+            </script>
+        }
+    </body>
+    </html>

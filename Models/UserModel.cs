@@ -7,6 +7,7 @@ public class User
 
 
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     
     public int UserId { get; set; }
 
