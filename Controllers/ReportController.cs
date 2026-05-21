@@ -35,7 +35,7 @@ public class ReportController : Controller
     // it is used to handle the post request from the report page
 
     
-    public IActionResult GenerateReport(string reportType , string dataType)
+    public IActionResult GenerateReport(string reportType , string dataType , string month)
     {
 
         try
@@ -48,7 +48,15 @@ public class ReportController : Controller
             ReportFactory reportFactory = new ReportFactory(_context);
             IReportData reportData = reportFactory.GetReportData(dataType);
 
-            ReportData data = reportData.MapData();
+
+            var reportParameters = new Dictionary<string, string>();
+
+            if (!string.IsNullOrEmpty(month))
+            {
+                reportParameters.Add("Month", month);
+            }
+          
+            ReportData data = reportData.MapData(reportParameters);
             var activeStrategy = _reportStrategies.FirstOrDefault(s => s.reportType.Equals(reportType, StringComparison.OrdinalIgnoreCase));
 
             if (activeStrategy == null)

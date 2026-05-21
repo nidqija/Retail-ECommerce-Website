@@ -29,4 +29,8 @@ public class MyDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
 
+    public DbSet<Notification> Notifications { get; set; }
+
+    public DbSet<Payment> Payments { get; set; }
+
 }

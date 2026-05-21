@@ -42,6 +42,8 @@ public class CSVReportStrategy : IReportStrategy
                             string.Join(",", reportData.Headers) + "\n" +
                             string.Join("\n", reportData.Rows.Select(row => string.Join(",", row)));
 
+        
+
 
         return System.Text.Encoding.UTF8.GetBytes(csvContent);
     }

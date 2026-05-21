@@ -15,7 +15,7 @@ public class ProductReportData : IReportData
         _context = context;
     }
 
-    public ReportData MapData()
+    public ReportData MapData(Dictionary<string, string>? parameters = null)
     {
         var reportData = new ReportData
         {
@@ -48,7 +48,7 @@ public class UserReportData : IReportData
         _context = context;
     }
 
-    public ReportData MapData()
+    public ReportData MapData(Dictionary<string, string>? parameters = null)
     {
         var reportData = new ReportData
         {
@@ -65,4 +65,50 @@ public class UserReportData : IReportData
         }
 }
 
+
+
+public class PaymentReportData : IReportData
+{
+    private readonly MyDbContext _context;
+    public string TargetReportDataType => "PaymentReport";
+
+    public PaymentReportData(MyDbContext context)
+    {
+        _context = context;
+    }
+
+    public ReportData MapData(Dictionary<string, string>? parameters = null)
+    {
+        int currentMonth = DateTime.Now.Month;
+
+        if (parameters != null && parameters.ContainsKey("Month"))
+        {
+            if (int.TryParse(parameters["Month"], out int month))
+            {
+                currentMonth = month;
+            }
+        }
+
+        int targetYear = DateTime.Now.Year;
+
+        var startofDate = new DateTime(targetYear, currentMonth, 1);
+        var endOfDate = startofDate.AddMonths(1).AddDays(-1);
+
+
+        var reportData = new ReportData
+        {
+            Title = "Payment Report for the month of " + new DateTime(targetYear, currentMonth, 1).ToString("MMMM"),
+            Headers = new List<string> { "User Email", "Amount", "Status" },
+            Rows = _context.Payments.Where(p => p.PaymentDate >= startofDate && p.PaymentDate <= endOfDate).Select(p => new List<string>
+            {
+                p.User.Email,
+                $"${p.Total_Amount}",
+                p.PaymentStatus.ToString()
+            }).ToList()
+         };
+
+         return reportData;
+        }
+
+}
 

@@ -55,5 +55,27 @@ public class DataSeeder
         }
     }
 
+
+    public static async Task SeedPaymentAsync(MyDbContext context)
+    {
+        await context.Database.MigrateAsync();
+
+        if (!context.Payments.Any())
+        {
+            var payments = new List<Payment>
+            {
+                new Payment { Total_Amount = 99.99m, PaymentDate = DateTime.Now, PaymentStatus = PaymentStatus.Completed, PaymentMethod = PaymentMethod.CreditCard , UserId = 1},  
+                new Payment { Total_Amount = 49.99m, PaymentDate = DateTime.Now.AddMonths(-1), PaymentStatus = PaymentStatus.Pending, PaymentMethod = PaymentMethod.PayPal, UserId = 1 },
+                new Payment { Total_Amount = 19.99m, PaymentDate = DateTime.Now.AddMonths(-2), PaymentStatus = PaymentStatus.Failed, PaymentMethod = PaymentMethod.BankTransfer, UserId = 1 }
+            };
+
+            context.Payments.AddRange(payments);
+            await context.SaveChangesAsync();
+        } else
+        {
+            Console.WriteLine("Payments already exist in the database. Skipping seeding.");
+        }
+    }
+
     
 }

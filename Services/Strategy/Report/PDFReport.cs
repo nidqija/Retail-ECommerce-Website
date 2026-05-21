@@ -33,12 +33,18 @@ public class PDFReportStrategy : IReportStrategy
         {
          return Document.Create(container =>
             {
+              
                 container.Page(page =>
                 {
+                 
                     // decide the page size and margin
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
-                    page.Header().Text("Live Product Inventory Report").FontSize(22).Bold();
+                     foreach(var title in reportData.Title.Split('\n'))
+                    {
+                       page.Header().Text(title).FontSize(22).Bold();
+                       
+                    }
                     page.Content().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
@@ -57,12 +63,18 @@ public class PDFReportStrategy : IReportStrategy
                         }
                     });
 
+
+                    if (reportData.Rows.Count == 0)
+                    {
+                        table.Cell().ColumnSpan((uint)reportData.Headers.Count).Padding(5).Text("No data available").FontSize(12).Italic();
+                    }
+
                     foreach (var row in reportData.Rows)
                         {
                             foreach (var cell in row)
                             {
                                 
-                                string cleanContent = cell ?? string.Empty;
+                                string cleanContent = string.IsNullOrEmpty(cell) ? "Data not available" : cell;
                                 
                                 table.Cell()
                                      .BorderBottom(0.5f)
@@ -70,7 +82,11 @@ public class PDFReportStrategy : IReportStrategy
                                      .Padding(5)
                                      .Text(cleanContent)
                                      .FontSize(12);
+
+                                
                             }
+                            
+                            
                         }
                   });
                     
