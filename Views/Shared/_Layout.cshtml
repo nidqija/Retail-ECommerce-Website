@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,10 +26,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Privacy" asp-action="Index">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">Products</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Dashboard</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Cart" asp-action="Index">🛒 Cart</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
                         </li>
                     </ul> <ul class="navbar-nav ms-auto order-1 order-sm-2">
 
@@ -39,7 +42,10 @@
                             @if (userName != null)
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Orders">My Orders</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout (@userName)</a>
                                 </li>
                             }
 

@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Shopping Cart";
+    var items = (ViewBag.CartItems as IEnumerable<dynamic>) ?? Enumerable.Empty<dynamic>();
+    decimal subtotal = ViewBag.Subtotal ?? 0m;
+}
+
+<h1 class="mb-4">🛒 Shopping Cart</h1>
+
+@if (!items.Any())
+{
+    <div class="text-center py-5">
+        <p class="fs-4 text-muted">Your cart is empty.</p>
+        <a asp-controller="Products" asp-action="Index" class="btn btn-primary">Browse Products</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <!-- Cart Items Table -->
+        <div class="col-lg-8">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in items)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.Name</td>
+                            <td class="text-center">
+                                <input type="number" value="@item.Quantity" min="1"
+                                       class="form-control form-control-sm text-center" style="width:65px; margin:auto;" />
+                            </td>
+                            <td class="text-end">$@((decimal)item.Price).ToString("0.00")</td>
+                            <td class="text-end fw-bold">$@(((decimal)item.Price * (int)item.Quantity).ToString("0.00"))</td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-danger btn-sm">✕</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">Order Summary</div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>$@subtotal.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 text-muted small">
+                        <span>Shipping</span>
+                        <span>Calculated at checkout</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Subtotal</span>
+                        <span class="text-primary">$@subtotal.ToString("0.00")</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Checkout" asp-action="Index"
+                       class="btn btn-primary w-100 btn-lg">Proceed to Checkout →</a>
+                </div>
+            </div>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-link w-100 mt-2">← Continue Shopping</a>
+        </div>
+    </div>
+}

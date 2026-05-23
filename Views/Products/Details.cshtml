@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Product Details";
+    var p = ViewBag.Product as RetailECommerce.Models.Product;
+}
+
+@if (p == null)
+{
+    <div class="alert alert-warning mt-4">Product not found.</div>
+    <a asp-controller="Products" asp-action="Index" class="btn btn-secondary">← Back to Catalog</a>
+}
+else
+{
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">Catalog</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@p.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Image column -->
+        <div class="col-md-5">
+            <div class="bg-light rounded-4 d-flex align-items-center justify-content-center"
+                 style="height: 360px; font-size: 6rem;">
+                📦
+            </div>
+        </div>
+
+        <!-- Details column -->
+        <div class="col-md-7">
+            <h1 class="mb-2">@p.Name</h1>
+            <p class="text-muted">SKU: #@p.ProductId</p>
+            <hr />
+            <p class="lead">@p.Description</p>
+
+            <div class="mb-3">
+                @if (p.StockQuantity > 0)
+                {
+                    <span class="badge bg-success fs-6">In Stock — @p.StockQuantity units left</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger fs-6">Out of Stock</span>
+                }
+            </div>
+
+            <div class="fs-2 fw-bold text-primary mb-4">$@p.Price.ToString("0.00")</div>
+
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <label for="qty" class="form-label mb-0 fw-semibold">Qty:</label>
+                <input type="number" id="qty" name="qty" value="1" min="1" max="@p.StockQuantity"
+                       class="form-control" style="width:80px;" @(p.StockQuantity == 0 ? "disabled" : "") />
+                <button class="btn btn-primary btn-lg flex-grow-1" @(p.StockQuantity == 0 ? "disabled" : "")>
+                    🛒 Add to Cart
+                </button>
+            </div>
+
+            <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">
+                ← Back to Catalog
+            </a>
+        </div>
+    </div>
+}

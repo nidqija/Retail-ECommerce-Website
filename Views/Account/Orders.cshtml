@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "My Orders";
+    var orders = ViewBag.Orders as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<h1 class="mb-4">📋 My Orders</h1>
+
+@if (!orders.Any())
+{
+    <div class="alert alert-info">You haven't placed any orders yet.</div>
+    <a asp-controller="Products" asp-action="Index" class="btn btn-primary">Start Shopping</a>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in orders)
+                {
+                    <tr>
+                        <td class="fw-semibold">#@o.OrderId</td>
+                        <td>@((DateTime)o.Date).ToString("MMM d, yyyy")</td>
+                        <td class="text-end">$@((decimal)o.Total).ToString("0.00")</td>
+                        <td class="text-center">
+                            @{
+                                var status = o.Status.ToString();
+                                var badgeClass = status switch
+                                {
+                                    "Completed" => "bg-success",
+                                    "Pending"   => "bg-warning text-dark",
+                                    "Failed"    => "bg-danger",
+                                    "Refunded"  => "bg-info text-dark",
+                                    _           => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @badgeClass">@status</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

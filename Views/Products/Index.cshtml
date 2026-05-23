@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Product Catalog";
+    var products = ViewBag.Products as IEnumerable<RetailECommerce.Models.Product> ?? Enumerable.Empty<RetailECommerce.Models.Product>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Product Catalog (hardcoded HTML data,not linked to database) </h1>
+    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary">
+        🛒 View Cart
+    </a>
+</div>
+
+@if (!products.Any())
+{
+    <div class="alert alert-info">No products available at the moment.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var p in products)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                         style="height:180px; font-size:3rem;">
+                        📦
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@p.Name</h5>
+                        <p class="card-text text-muted small flex-grow-1">@p.Description</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fw-bold fs-5 text-primary">$@p.Price.ToString("0.00")</span>
+                            @if (p.StockQuantity > 0)
+                            {
+                                <span class="badge bg-success">In Stock (@p.StockQuantity)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Out of Stock</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 d-flex gap-2">
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId"
+                           class="btn btn-outline-secondary btn-sm flex-grow-1">View Details</a>
+                        @if (p.StockQuantity > 0)
+                        {
+                            <button class="btn btn-primary btn-sm flex-grow-1" type="button">Add to Cart</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

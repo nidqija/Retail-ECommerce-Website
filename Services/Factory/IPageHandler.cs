@@ -66,7 +66,86 @@ public class AdminHomePageHandler : IPageHandler
     }
 }
 
+// ── Customer Storefront Handlers ─────────────────────────────────────────────
 
+public class ProductsIndexPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Products/Index.cshtml");
+    }
+}
 
+public class ProductsDetailsPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Products/Details.cshtml");
+    }
+}
 
+public class CartPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Cart/Index.cshtml");
+    }
+}
 
+public class CheckoutPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Checkout/Index.cshtml");
+    }
+}
+
+public class AccountOrdersPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Account/Orders.cshtml");
+    }
+}
+
+// ── Admin Panel Handlers ──────────────────────────────────────────────────────
+
+public class AdminProductsPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/Products.cshtml");
+    }
+}
+
+public class AdminCreateProductPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/CreateProduct.cshtml");
+    }
+}
+
+public class AdminEditProductPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/EditProduct.cshtml");
+    }
+}
+
+public class AdminOrdersPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/Orders.cshtml");
+    }
+}
+
+public class AdminOrderDetailsPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/OrderDetails.cshtml");
+    }
+}

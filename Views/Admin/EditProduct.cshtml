@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Edit Product";
+    var p = ViewBag.Product as RetailECommerce.Models.Product;
+}
+
+<div class="mb-4">
+    <a asp-controller="Admin" asp-action="Products" class="text-muted small">← Back to Products</a>
+    <h1 class="mt-1">Edit Product @(p != null ? $"#{p.ProductId}" : "")</h1>
+</div>
+
+@if (p == null)
+{
+    <div class="alert alert-warning">Product not found.</div>
+}
+else
+{
+    <div class="card shadow-sm" style="max-width: 680px;">
+        <div class="card-body">
+            <form asp-controller="Admin" asp-action="EditProduct" asp-route-id="@p.ProductId" method="post">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="Name">Product Name</label>
+                    <input type="text" id="Name" name="Name" class="form-control"
+                           value="@p.Name" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="Price">Price (USD)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" id="Price" name="Price" class="form-control"
+                               value="@p.Price" step="0.01" min="0" required />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="Description">Description</label>
+                    <textarea id="Description" name="Description" class="form-control"
+                              rows="4" required>@p.Description</textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" for="StockQuantity">Stock Quantity</label>
+                    <input type="number" id="StockQuantity" name="StockQuantity" class="form-control"
+                           value="@p.StockQuantity" min="0" required />
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">💾 Save Changes</button>
+                    <a asp-controller="Admin" asp-action="Products" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+}

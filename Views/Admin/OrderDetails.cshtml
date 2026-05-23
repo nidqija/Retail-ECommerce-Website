@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Order Details";
+    var o = ViewBag.Order as RetailECommerce.Models.Payment;
+}
+
+<div class="mb-4">
+    <a asp-controller="Admin" asp-action="Orders" class="text-muted small">← Back to Orders</a>
+    <h1 class="mt-1">Order #@o?.Id Details</h1>
+</div>
+
+@if (o == null)
+{
+    <div class="alert alert-warning">Order not found.</div>
+}
+else
+{
+    <div class="row g-4">
+
+        <!-- Left: Invoice summary -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header fw-bold">📄 Payment Summary</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Order ID</dt>
+                        <dd class="col-sm-8">#@o.Id</dd>
+
+                        <dt class="col-sm-4">Date</dt>
+                        <dd class="col-sm-8">@o.PaymentDate.ToString("MMMM d, yyyy — HH:mm")</dd>
+
+                        <dt class="col-sm-4">Payment Method</dt>
+                        <dd class="col-sm-8">@o.PaymentMethod</dd>
+
+                        <dt class="col-sm-4">Amount</dt>
+                        <dd class="col-sm-8 fw-bold text-primary fs-5">$@o.Total_Amount.ToString("0.00")</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                var badgeClass = o.PaymentStatus switch
+                                {
+                                    RetailECommerce.Models.PaymentStatus.Completed => "bg-success",
+                                    RetailECommerce.Models.PaymentStatus.Pending   => "bg-warning text-dark",
+                                    RetailECommerce.Models.PaymentStatus.Failed    => "bg-danger",
+                                    RetailECommerce.Models.PaymentStatus.Refunded  => "bg-info text-dark",
+                                    _                                               => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @badgeClass fs-6">@o.PaymentStatus</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Mock line items -->
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">🛒 Items Purchased (Mock)</div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mechanical Keyboard</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$89.99</td>
+                            </tr>
+                            <tr>
+                                <td>27" IPS Monitor</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">$329.99</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="2" class="text-end fw-bold">Total</td>
+                                <td class="text-end fw-bold text-primary">$@o.Total_Amount.ToString("0.00")</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Status change control -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white fw-bold">⚙️ Update Order Status</div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Changing the status here will update the order record.
+                        (State pattern demo placeholder.)
+                    </p>
+                    <form asp-controller="Admin" asp-action="UpdateOrderStatus"
+                          asp-route-id="@o.Id" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">New Status</label>
+                            <select name="status" class="form-select">
+                                @foreach (var status in Enum.GetValues<RetailECommerce.Models.PaymentStatus>())
+                                {
+                                    <option value="@status" selected="@(status == o.PaymentStatus)">
+                                        @status
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
