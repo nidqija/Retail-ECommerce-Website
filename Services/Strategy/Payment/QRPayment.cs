@@ -6,9 +6,12 @@ namespace RetailECommerce.Services.Strategy.Payment
     {
         public bool ProcessPayment(decimal amount)
         {
-            // Add QR code generation/validation logic here
-            Console.WriteLine($"Processing QR Payment of {amount:C}");
+            // Simulate verifying a generated QR code payment
+            Console.WriteLine($"[Gateway] Verifying QR Code transaction for {amount:C}");
             
+            if (amount <= 0) return false;
+
+            Console.WriteLine("[Gateway] QR Transaction Verified.");
             return true;
         }
     }

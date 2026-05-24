@@ -6,10 +6,10 @@ namespace RetailECommerce.Services.Strategy.Payment
     {
         public bool ProcessPayment(decimal amount)
         {
-            // Logic for Cash on Delivery (e.g., updating order status to pending payment)
-            Console.WriteLine($"Order placed via Cash on Delivery. Collect {amount:C} upon arrival.");
+            // Simulate logging the COD order
+            Console.WriteLine($"[Logistics] Order flagged for Cash on Delivery. Amount to collect: {amount:C}");
             
-            return true;
+            return true; // COD is always "successful" at checkout since payment happens later
         }
     }
 }

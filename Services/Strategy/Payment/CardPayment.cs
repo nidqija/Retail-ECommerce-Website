@@ -6,10 +6,17 @@ namespace RetailECommerce.Services.Strategy.Payment
     {
         public bool ProcessPayment(decimal amount)
         {
-            // Add real integration logic here (e.g., Stripe, PayPal API)
-            Console.WriteLine($"Processing Card Payment of {amount:C}");
+            // Simulate calling a payment gateway like Stripe or PayPal
+            Console.WriteLine($"[Gateway] Attempting to charge Card for {amount:C}");
             
-            // Simulating a successful transaction
+            // For simulation: we'll pretend the payment always succeeds unless the amount is 0
+            if (amount <= 0)
+            {
+                Console.WriteLine("[Gateway] Error: Invalid amount.");
+                return false; 
+            }
+
+            Console.WriteLine("[Gateway] Transaction Approved.");
             return true; 
         }
     }
