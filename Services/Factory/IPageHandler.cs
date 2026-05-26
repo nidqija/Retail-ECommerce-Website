@@ -149,3 +149,11 @@ public class AdminOrderDetailsPageHandler : IPageHandler
         return controller.View("~/Views/Admin/OrderDetails.cshtml");
     }
 }
+
+public class EditProfilePageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Account/EditAccount.cshtml");
+    }
+}

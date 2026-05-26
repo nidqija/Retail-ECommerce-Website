@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="~/RetailECommerce.styles.css" asp-append-version="true" />
 </head>
 <body>
+     @{
+      var userName = Context.Session.GetString("UserEmail");
+      var userRole = Context.Session.GetString("UserRole");
+      var userFullName = Context.Session.GetString("FullName");
+     }
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -36,14 +41,16 @@
                         </li>
                     </ul> <ul class="navbar-nav ms-auto order-1 order-sm-2">
 
-                        @{
-                            var userName = Context.Session.GetString("UserEmail");
-                        }
+                       
                             @if (userName != null)
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Orders">My Orders</a>
                                 </li>
+                                <li class="nav-item" >
+                                    <a class="nav-link text-dark" asp-area="" data-bs-toggle="modal" data-bs-target="#myAccountModalDialog" >My Account</a>
+                                </li>
+                           
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout (@userName)</a>
                                 </li>
@@ -69,6 +76,35 @@
             @RenderBody()
         </main>
     </div>
+
+
+   @if (userName != null){
+
+             <div class="modal fade" id="myAccountModalDialog" tabindex="-1" aria-labelledby="myAccountModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="myAccountModalLabel">My Account</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Email:</strong> @userName</p>
+                                                <p><strong>Role:</strong> @userRole</p>
+                                                <p><strong>Full Name:</strong> @userFullName</p>
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a asp-area="" asp-controller="Account" asp-action="EditProfilePage" class="btn btn-primary">Edit Profile</a> 
+                                                <button type="button" class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="Orders">View My Orders</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+           </div>
+    
+   }
+   
+    
 
     <footer class="border-top footer text-muted">
         <div class="container">

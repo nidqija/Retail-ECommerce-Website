@@ -136,3 +136,11 @@ public class AdminOrderDetailsPageCreator : PageCreator
         return new AdminOrderDetailsPageHandler();
     }
 }
+
+public class EditProfilePageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new EditProfilePageHandler();
+    }
+}

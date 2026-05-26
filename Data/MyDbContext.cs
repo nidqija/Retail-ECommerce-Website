@@ -17,8 +17,6 @@ public class MyDbContext : DbContext
             .WithMany(u => u.Notifications)
             .HasForeignKey(n => n.UserId);
 
-        
-
     }
 
 
