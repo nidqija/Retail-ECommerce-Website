@@ -49,9 +49,7 @@ public class SignInController : Controller
 
             if (user.Role == UserRole.Vendor)
             {
-
-                
-                return RedirectToAction("Index", "AdminControllerFacade");
+                return RedirectToAction("Index", "Admin");
             }
              
             
