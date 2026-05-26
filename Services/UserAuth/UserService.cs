@@ -42,6 +42,27 @@ public class UserService : IUserService
         }
         return null;
     }
+
+    public bool EditUserProfile(int userId, string fullName, string email)
+    {
+        var user = _context.Users.Find(userId);
+        if (user == null)
+            return false;
+
+        if (user.Email != email && !IsEmailUnique(email))
+            return false;
+
+        user.FullName = fullName;
+        user.Email = email;
+        _context.SaveChanges();
+        return true;
+    }
+
+
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
    
 
     

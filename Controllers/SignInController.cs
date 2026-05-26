@@ -41,9 +41,11 @@ public class SignInController : Controller
             //  and maintain user state
             HttpContext.Session.SetString("UserEmail", user.Email);
             HttpContext.Session.SetString("UserRole", user.Role.ToString());
+            HttpContext.Session.SetString("FullName", user.FullName);
 
             Console.WriteLine("User authenticated successfully.");
             Console.WriteLine("User Password: " + user.Password);
+            Console.WriteLine("User Full Name: " + user.FullName);
 
             if (user.Role == UserRole.Vendor)
             {
@@ -62,6 +64,9 @@ public class SignInController : Controller
             return View("Index");
         }
     }
+
+
+    
 
     
 

@@ -8,5 +8,9 @@ public interface IUserService
     bool IsEmailUnique(string email);
 
     Task<User?> AuthenticateUserAsync(string email, string password);
+
+    bool EditUserProfile(int userId, string fullName, string email);
+
+    Task<User?> GetUserByEmailAsync(string email);
     
 }
