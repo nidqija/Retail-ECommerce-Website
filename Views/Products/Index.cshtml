@@ -1,6 +1,9 @@
 @{
     ViewData["Title"] = "Product Catalog";
     var products = ViewBag.Products as IEnumerable<RetailECommerce.Models.Product> ?? Enumerable.Empty<RetailECommerce.Models.Product>();
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var searchKeyword = ViewBag.SearchKeyword as string ?? "";
+    var selectedCategory = ViewBag.SelectedCategory as string ?? "";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -10,9 +13,69 @@
     </a>
 </div>
 
+<!-- Search and Filter Bar -->
+<div class="card mb-4 p-3 bg-light">
+    <div class="row g-3 align-items-end">
+        <!-- Search Bar -->
+        <div class="col-md-6">
+            <label for="searchInput" class="form-label fw-bold">Search Products</label>
+            <form method="get" asp-controller="Products" asp-action="Index" class="d-flex gap-2">
+                <input type="text" 
+                       id="searchInput"
+                       name="searchKeyword" 
+                       class="form-control" 
+                       placeholder="Search by product name or description..." 
+                       value="@searchKeyword">
+                <button type="submit" class="btn btn-primary">Search</button>
+                @if (!string.IsNullOrEmpty(searchKeyword))
+                {
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-secondary">Clear</a>
+                }
+            </form>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="col-md-4">
+            <label for="categoryFilter" class="form-label fw-bold">Filter by Category</label>
+            <form method="get" asp-controller="Products" asp-action="Index" id="categoryForm">
+                <div class="d-flex gap-2">
+                    <select id="categoryFilter" name="category" class="form-select" onchange="document.getElementById('categoryForm').submit();">
+                        <option value="">All Categories</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat" selected="@(selectedCategory == cat)">@cat</option>
+                        }
+                    </select>
+                    @if (!string.IsNullOrEmpty(selectedCategory))
+                    {
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary">Clear</a>
+                    }
+                </div>
+                <input type="hidden" name="searchKeyword" value="@searchKeyword">
+            </form>
+        </div>
+
+        <!-- Results Counter -->
+        <div class="col-md-2">
+            <div class="alert alert-info mb-0">
+                <small><strong>@products.Count()</strong> product(s) found</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (!products.Any())
 {
-    <div class="alert alert-info">No products available at the moment.</div>
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+        <span>⚠️</span>
+        <div>
+            No products match your search criteria. 
+            @if (!string.IsNullOrEmpty(searchKeyword) || !string.IsNullOrEmpty(selectedCategory))
+            {
+                <a asp-controller="Products" asp-action="Index" class="alert-link">View all products</a>
+            }
+        </div>
+    </div>
 }
 else
 {
