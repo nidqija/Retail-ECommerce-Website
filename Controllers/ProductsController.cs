@@ -19,6 +19,8 @@ public class ProductsController : Controller
             new Product { ProductId = 5, Name = "4K Monitor",           Description = "32-inch 4K display, 60Hz refresh rate, USB-C connectivity.", Price = 399.99m, StockQuantity = 12, Category = "Computers & Accessories", SubCategory = "Technology" },
             new Product { ProductId = 6, Name = "Playstation 10 (PSX)",  Description = "Latest gaming console with enhanced graphics.",              Price = 2499.99m,  StockQuantity = 35, Category = "Gaming & Consoles", SubCategory = "Entertainment" },
             new Product { ProductId = 7, Name = "Iphone 9999",          Description = "The latest model, iphone 9999 that can cure all diseases.",  Price = 9999.99m,  StockQuantity = 10, Category = "Mobile & Accessories", SubCategory = "Technology" },
+            new Product { ProductId = 8, Name = "Bluetooth Speaker",    Description = "Portable speaker with deep bass and 12-hour battery life.",   Price = 59.99m,  StockQuantity = 25, Category = "Audio & Headphones", SubCategory = "Technology" },
+            new Product { ProductId = 9, Name = "Sport Shoes",             Description = "Comfortable shoes for sports activities.",        Price = 29.99m,  StockQuantity = 50, Category = "Sports & Outdoors", SubCategory = "Apparel" },
         };
 
         // Apply search filter by keyword
@@ -50,6 +52,8 @@ public class ProductsController : Controller
             new Product { ProductId = 5, Name = "4K Monitor",           Description = "32-inch 4K display, 60Hz refresh rate, USB-C connectivity.", Price = 399.99m, StockQuantity = 12, Category = "Computers & Accessories", SubCategory = "Technology" },
             new Product { ProductId = 6, Name = "Playstation 10 (PSX)",  Description = "Latest gaming console with enhanced graphics.",              Price = 2499.99m,  StockQuantity = 35, Category = "Gaming & Consoles", SubCategory = "Entertainment" },
             new Product { ProductId = 7, Name = "Iphone 9999",          Description = "The latest model, iphone 9999 that can cure all diseases.",        Price = 9999.99m,  StockQuantity = 10, Category = "Mobile & Accessories", SubCategory = "Technology" },
+            new Product { ProductId = 8, Name = "Bluetooth Speaker",    Description = "Portable speaker with deep bass and 12-hour battery life.",   Price = 59.99m,  StockQuantity = 25, Category = "Audio & Headphones", SubCategory = "Technology" },
+            new Product { ProductId = 9, Name = "Sport Shoes",             Description = "Comfortable shoes for sports activities.",        Price = 29.99m,  StockQuantity = 50, Category = "Sports & Outdoors", SubCategory = "Apparel" },
         };
         
         var categories = allCategories.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
