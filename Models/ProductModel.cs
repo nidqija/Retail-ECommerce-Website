@@ -25,4 +25,7 @@ public class Product
 
     [MaxLength(50)]
     public string Category { get; set; } = "General";
+
+    [MaxLength(50)]
+    public string SubCategory { get; set; } = "General";
 }

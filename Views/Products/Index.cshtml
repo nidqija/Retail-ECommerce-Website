@@ -2,8 +2,10 @@
     ViewData["Title"] = "Product Catalog";
     var products = ViewBag.Products as IEnumerable<RetailECommerce.Models.Product> ?? Enumerable.Empty<RetailECommerce.Models.Product>();
     var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var subCategories = ViewBag.SubCategories as List<string> ?? new List<string>();
     var searchKeyword = ViewBag.SearchKeyword as string ?? "";
     var selectedCategory = ViewBag.SelectedCategory as string ?? "";
+    var selectedSubCategory = ViewBag.SelectedSubCategory as string ?? "";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,8 +19,8 @@
 <div class="card mb-4 p-3 bg-light">
     <div class="row g-3 align-items-end">
         <!-- Search Bar -->
-        <div class="col-md-6">
-            <label for="searchInput" class="form-label fw-bold">Search Products</label>
+        <div class="col-md-5">
+            <label for="searchInput" class="form-label fw-bold">🔍 Search Products</label>
             <form method="get" asp-controller="Products" asp-action="Index" class="d-flex gap-2">
                 <input type="text" 
                        id="searchInput"
@@ -35,8 +37,8 @@
         </div>
 
         <!-- Category Filter -->
-        <div class="col-md-4">
-            <label for="categoryFilter" class="form-label fw-bold">Filter by Category</label>
+        <div class="col-md-3">
+            <label for="categoryFilter" class="form-label fw-bold">📂 Category</label>
             <form method="get" asp-controller="Products" asp-action="Index" id="categoryForm">
                 <div class="d-flex gap-2">
                     <select id="categoryFilter" name="category" class="form-select" onchange="document.getElementById('categoryForm').submit();">
@@ -48,17 +50,40 @@
                     </select>
                     @if (!string.IsNullOrEmpty(selectedCategory))
                     {
-                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary">Clear</a>
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary btn-sm">✕</a>
                     }
                 </div>
                 <input type="hidden" name="searchKeyword" value="@searchKeyword">
+                <input type="hidden" name="subCategory" value="@selectedSubCategory">
+            </form>
+        </div>
+
+        <!-- SubCategory Filter -->
+        <div class="col-md-3">
+            <label for="subCategoryFilter" class="form-label fw-bold">🏷️ Sub-Category</label>
+            <form method="get" asp-controller="Products" asp-action="Index" id="subCategoryForm">
+                <div class="d-flex gap-2">
+                    <select id="subCategoryFilter" name="subCategory" class="form-select" onchange="document.getElementById('subCategoryForm').submit();">
+                        <option value="">All Sub-Categories</option>
+                        @foreach (var subCat in subCategories)
+                        {
+                            <option value="@subCat" selected="@(selectedSubCategory == subCat)">@subCat</option>
+                        }
+                    </select>
+                    @if (!string.IsNullOrEmpty(selectedSubCategory))
+                    {
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary btn-sm">✕</a>
+                    }
+                </div>
+                <input type="hidden" name="searchKeyword" value="@searchKeyword">
+                <input type="hidden" name="category" value="@selectedCategory">
             </form>
         </div>
 
         <!-- Results Counter -->
-        <div class="col-md-2">
-            <div class="alert alert-info mb-0">
-                <small><strong>@products.Count()</strong> product(s) found</small>
+        <div class="col-md-1">
+            <div class="alert alert-info mb-0 text-center">
+                <small><strong>@products.Count()</strong> found</small>
             </div>
         </div>
     </div>
