@@ -2,10 +2,19 @@ namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
+using RetailECommerce.Services.Repository;
 
 
 public class ProductsController : Controller
 {
+
+    private IProductRepository _productRepository;
+
+
+    public ProductsController(IProductRepository productRepository)
+    {
+        _productRepository = productRepository;
+    }
     // GET: /Products  — product catalog grid
     public IActionResult Index()
     {
@@ -27,16 +36,11 @@ public class ProductsController : Controller
     public IActionResult Details(int id)
     {
         // Mock: return a product matching the id, or a fallback
-        var product = new Product
-        {
-            ProductId  = id,
-            Name       = $"Product #{id}",
-            Description = "This is a detailed description of the product. It covers all key features, materials used, compatibility notes, and warranty information.",
-            Price       = 49.99m + (id * 10),
-            StockQuantity = id % 3 == 0 ? 0 : 15   // every 3rd item is "out of stock"
-        };
 
-        ViewBag.Product = product;
+        // update : replace the mock data with the data from the database using the repository pattern
+        var productbyId = _productRepository.GetProductById(id);
+        ViewBag.Product = productbyId;
+
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
     }
