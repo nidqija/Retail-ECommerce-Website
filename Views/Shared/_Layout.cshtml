@@ -52,7 +52,11 @@
                                 </li>
                            
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout (@userName)</a>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0 p-0">
+                                        <button type="submit" class="nav-link text-dark btn btn-link border-0 p-0 m-0 text-start align-baseline">
+                                            Logout (@userName)
+                                        </button>
+                                    </form>
                                 </li>
                             }
 

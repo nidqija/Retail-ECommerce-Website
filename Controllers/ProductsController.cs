@@ -1,4 +1,5 @@
 namespace RetailECommerce.Controllers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
@@ -33,6 +34,8 @@ public class ProductsController : Controller
     }
 
     // GET: /Products/Details/{id}
+
+    [Authorize] // only authenticated users can access the product details page
     public IActionResult Details(int id)
     {
         // Mock: return a product matching the id, or a fallback

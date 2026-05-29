@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 public class AccountController : Controller
@@ -33,9 +35,13 @@ public class AccountController : Controller
     }
 
     // POST: /Account/Logout
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+
         HttpContext.Session.Clear();
+
+        // clear the authentication cookie to log the user out
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
 
