@@ -20,7 +20,7 @@
     <div class="row g-3 align-items-end">
         <!-- Search Bar -->
         <div class="col-md-5">
-            <label for="searchInput" class="form-label fw-bold">🔍 Search Products</label>
+            <label for="searchInput" class="form-label fw-bold">Search Products</label>
             <form method="get" asp-controller="Products" asp-action="Index" class="d-flex gap-2">
                 <input type="text" 
                        id="searchInput"
@@ -38,7 +38,7 @@
 
         <!-- Category Filter -->
         <div class="col-md-3">
-            <label for="categoryFilter" class="form-label fw-bold">📂 Category</label>
+            <label for="categoryFilter" class="form-label fw-bold">Category</label>
             <form method="get" asp-controller="Products" asp-action="Index" id="categoryForm">
                 <div class="d-flex gap-2">
                     <select id="categoryFilter" name="category" class="form-select" onchange="document.getElementById('categoryForm').submit();">
@@ -60,7 +60,7 @@
 
         <!-- SubCategory Filter -->
         <div class="col-md-3">
-            <label for="subCategoryFilter" class="form-label fw-bold">🏷️ Sub-Category</label>
+            <label for="subCategoryFilter" class="form-label fw-bold">Sub-Category</label>
             <form method="get" asp-controller="Products" asp-action="Index" id="subCategoryForm">
                 <div class="d-flex gap-2">
                     <select id="subCategoryFilter" name="subCategory" class="form-select" onchange="document.getElementById('subCategoryForm').submit();">
