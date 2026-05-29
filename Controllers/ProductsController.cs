@@ -40,4 +40,7 @@ public class ProductsController : Controller
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
     }
+
+
+    
 }

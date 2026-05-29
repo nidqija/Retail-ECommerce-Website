@@ -2,56 +2,90 @@
     ViewData["Title"] = "Home";
 }
 
-<section class="py-5">
-    <div class="row align-items-center g-4">
-        <div class="col-lg-7">
-            <p class="text-uppercase text-muted mb-2">RetailECommerce</p>
-            <h1 class="display-4 fw-bold">A simple boilerplate home page for the storefront.</h1>
-            <p class="lead mt-3">
-                This page is now routed through <strong>Home/Index</strong>, which matches the default MVC route.
-            </p>
-            <div class="d-flex gap-3 mt-4">
-                <a class="btn btn-primary btn-lg" asp-controller="Privacy" asp-action="Index">Privacy</a>
+<nav aria-label="breadcrumb" class="mb-5">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-dark text-decoration-none small tracking-wide text-uppercase">Home</a></li>
+        <li class="breadcrumb-item active small tracking-wide text-uppercase" aria-current="page">New Arrivals</li>
+    </ol>
+</nav>
+
+<section class="py-5 bg-white">
+    <div class="row g-5 align-items-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="bg-light rounded-0 d-flex align-items-center justify-content-center"
+                 style="height: 480px; font-size: 7rem; mix-blend-mode: multiply;">
+                ✨
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="p-4 p-md-5 rounded-4 bg-light border">
-                <h2 class="h4">Page structure</h2>
-                <ul class="mb-0">
-                    <li>Hero section</li>
-                    <li>Feature summary</li>
-                    <li>Responsive layout</li>
-                </ul>
+
+        <div class="col-md-6 col-lg-7 ps-md-5">
+            <p class="text-uppercase text-muted small tracking-widest mb-2 fw-semibold">RetailECommerce // Studio Collection</p>
+            <h1 class="mb-3 display-4 fw-light text-dark">Simplicity in every thread.</h1>
+            <p class="text-muted small tracking-wide mb-4">Default Route: Home/Index</p>
+            <hr class="w-25 text-dark mb-4" />
+            
+            <p class="lead text-secondary mb-5 fw-light" style="line-height: 1.8;">
+                Welcome to your new digital storefront boilerplate. Carefully structured to scale effortlessly, 
+                this layout leverages native responsive grids and clean utility formatting to put your physical catalog center stage.
+            </p>
+
+            <div class="d-flex align-items-center gap-3">
+                <a class="btn btn-dark btn-lg px-5 rounded-0 text-uppercase small tracking-wider py-3" asp-controller="Products" asp-action="Index">
+                    Explore The Catalog
+                </a>
             </div>
         </div>
     </div>
 </section>
 
-<section id="features" class="py-4">
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5">Clean routing</h3>
-                    <p class="mb-0">The home page resolves from the default controller route.</p>
+<section id="features" class="py-5 mt-5 border-top border-light bg-white">
+    <div class="text-center mb-5">
+        <p class="text-uppercase text-muted small tracking-widest mb-1">Curated Pieces</p>
+        <h2 class="fw-light text-dark text-uppercase tracking-wide">Shop the Collection</h2>
+    </div>
+
+    <div class="row g-4 row-cols-1 row-cols-md-3">
+        @{
+            var products = ViewBag.Products as List<RetailECommerce.Models.Product>;
+        }
+
+        @if (products != null && products.Count > 0)
+        {
+            foreach (var product in products)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 rounded-0 bg-white">
+                        
+                        <div class="bg-light d-flex align-items-center justify-content-center position-relative overflow-hidden" 
+                             style="height: 380px; font-size: 4rem;">
+                            👔
+                        </div>
+
+                        <div class="card-body d-flex flex-column px-0 pt-3 bg-white">
+                            <h3 class="h6 text-uppercase tracking-wide fw-normal mb-1">
+                                <a href="#" class="text-dark text-decoration-none">@product.Name</a>
+                            </h3>
+                            
+                            <p class="card-text text-muted small fw-light mb-3" style="line-height: 1.5;">
+                                @product.Description
+                            </p>
+                            
+                            <div class="mt-auto pt-2">
+                                <p class="text-dark fw-normal mb-3">$@product.Price.ToString("0.00")</p>
+                                <a href="#" class="btn btn-outline-dark w-100 rounded-0 text-uppercase small tracking-wider py-2">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fw-light italic">Fresh garments dropping soon. Check back shortly.</p>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5">Boilerplate layout</h3>
-                    <p class="mb-0">A starter HTML structure is ready for real storefront content.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h3 class="h5">Bootstrap ready</h3>
-                    <p class="mb-0">The page uses the existing Bootstrap layout and site styles.</p>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>

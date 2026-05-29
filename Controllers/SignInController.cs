@@ -21,6 +21,8 @@ public class SignInController : Controller
     }
 
 
+    // only use task and async when you have to do something that takes time, 
+    // like database access or calling an external API
     [HttpPost]
     public async Task<IActionResult> Authenticate(string email , string password)
     {
@@ -49,6 +51,8 @@ public class SignInController : Controller
 
             if (user.Role == UserRole.Vendor)
             {
+                // this calls the Index() method of the AdminController to render the admin dashboard
+                // "Admin" is the name of the controller, "Index" is the name of the action method
                 return RedirectToAction("Index", "Admin");
             }
              
