@@ -22,4 +22,10 @@ public class Product
 
     [Required]
     public int StockQuantity { get; set; }
+
+    [MaxLength(50)]
+    public string Category { get; set; } = "General";
+
+    [MaxLength(50)]
+    public string SubCategory { get; set; } = "General";
 }
