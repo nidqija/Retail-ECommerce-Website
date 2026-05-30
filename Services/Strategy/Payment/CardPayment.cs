@@ -4,7 +4,7 @@ namespace RetailECommerce.Services.Strategy.Payment
 {
     public class CardPayment : IPaymentStrategy
     {
-        public bool ProcessPayment(decimal amount)
+        public PaymentResult ProcessPayment(decimal amount)
         {
             // Simulate calling a payment gateway like Stripe or PayPal
             Console.WriteLine($"[Gateway] Attempting to charge Card for {amount:C}");
@@ -13,11 +13,11 @@ namespace RetailECommerce.Services.Strategy.Payment
             if (amount <= 0)
             {
                 Console.WriteLine("[Gateway] Error: Invalid amount.");
-                return false; 
+                return PaymentResult.Failure(amount, "Card", "Invalid amount provided.");
             }
 
             Console.WriteLine("[Gateway] Transaction Approved.");
-            return true; 
+            return PaymentResult.Success(amount, "Card", $"TXN-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}");
         }
     }
 }

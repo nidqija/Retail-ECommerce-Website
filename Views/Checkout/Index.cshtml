@@ -6,6 +6,9 @@
     decimal total    = ViewBag.Total    ?? 0m;
 }
 
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
 <div class="container mt-5">
     <h2>Checkout</h2>
     <hr />
@@ -26,8 +29,8 @@
     <div class="row">
         <div class="col-md-7">
             <h4>Select Payment Method</h4>
-            <form asp-controller="Checkout" asp-action="Process" method="post">
-                <input type="hidden" name="totalAmount" value="@ViewBag.Total" />
+            <form asp-controller="Checkout" asp-action="Process" method="post" id="checkoutForm">
+                <input type="hidden" name="subtotal" value="@ViewBag.Subtotal" />
 
                 <div class="mb-3">
                     <div class="form-check">
@@ -44,6 +47,7 @@
                     </div>
                 </div>
 
+                <!-- Card Details Section -->
                 <div id="cardDetailsContainer" class="border p-3 rounded bg-light mb-4">
                     <h5>Card Details</h5>
                     <div class="mb-2">
@@ -62,7 +66,18 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg w-100">Place Order (@ViewBag.Total.ToString("C"))</button>
+                <!-- QR Payment Info Section -->
+                <div id="qrPaymentContainer" class="border p-3 rounded bg-light mb-4" style="display: none;">
+                    <h5>📱 QR Payment Instructions</h5>
+                    <p class="text-muted mb-0">Click the button below to view the QR code. Scan it with your e-wallet app to complete payment.</p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" id="viewQRButton" class="btn btn-info btn-lg" style="display: none;">
+                        📸 View QR Code to Scan
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Place Order (@ViewBag.Total.ToString("C"))</button>
+                </div>
             </form>
         </div>
 
@@ -98,6 +113,122 @@
         </div>
     </div>
 </div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" role="dialog" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">📱 Scan QR Code to Pay</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <p class="text-muted">Open your e-wallet app and scan this QR code</p>
+                    <canvas id="qrCanvas" width="300" height="300" class="border rounded p-2 bg-light"></canvas>
+                </div>
+                <div class="alert alert-info mb-0">
+                    <strong>Amount to pay:</strong> <br>
+                    <span id="qrAmount" class="h4 text-primary">@ViewBag.Total.ToString("C")</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <p class="text-muted mb-0 w-100">
+                    <small>Having trouble? You can complete the payment by clicking "Place Order" after scanning.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #qrCanvas {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #viewQRButton {
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .form-check-input:checked ~ .form-check-label {
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const paymentTypeRadios = document.querySelectorAll('input[name="paymentType"]');
+        const cardDetailsContainer = document.getElementById('cardDetailsContainer');
+        const qrPaymentContainer = document.getElementById('qrPaymentContainer');
+        const viewQRButton = document.getElementById('viewQRButton');
+        const qrCodeModal = new bootstrap.Modal(document.getElementById('qrCodeModal'), {
+            keyboard: false,
+            backdrop: 'static'
+        });
+
+        // Payment method selection handler
+        paymentTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function () {
+                handlePaymentMethodChange(this.value);
+            });
+        });
+
+        function handlePaymentMethodChange(paymentMethod) {
+            // Hide all containers
+            cardDetailsContainer.style.display = 'none';
+            qrPaymentContainer.style.display = 'none';
+            viewQRButton.style.display = 'none';
+
+            // Show relevant container
+            if (paymentMethod === 'card') {
+                cardDetailsContainer.style.display = 'block';
+            } else if (paymentMethod === 'qr') {
+                qrPaymentContainer.style.display = 'block';
+                viewQRButton.style.display = 'block';
+            }
+            // For COD, show nothing - just the Place Order button
+        }
+
+        // Generate QR code when button is clicked
+        viewQRButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            generateAndShowQRCode();
+        });
+
+        function generateAndShowQRCode() {
+            const subtotal = parseFloat('@ViewBag.Subtotal');
+            const total = parseFloat('@ViewBag.Total');
+            
+            // Create QR code data (payment URL or transaction details)
+            // Format: amount|currency|timestamp|reference
+            const timestamp = Date.now();
+            const qrData = `payment|MYR|${total.toFixed(2)}|${timestamp}|TNG_EWALLET_GRABPAY`;
+
+            // Generate QR code using Qrious library
+            const qr = new QRious({
+                element: document.getElementById('qrCanvas'),
+                value: qrData,
+                size: 300,
+                level: 'H',
+                mime: 'image/png'
+            });
+
+            // Show the modal
+            qrCodeModal.show();
+        }
+
+        // Initialize with card payment selected
+        handlePaymentMethodChange('card');
+    });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

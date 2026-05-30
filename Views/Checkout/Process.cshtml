@@ -1,0 +1,133 @@
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Success Banner -->
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="text-center">
+                    <h3 class="mb-2">✓ Order Placed Successfully!</h3>
+                    <p>@ViewBag.Message</p>
+                </div>
+            </div>
+
+            <!-- Order Details Card -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Order Confirmation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Transaction ID:</strong>
+                            <p class="text-muted">@ViewBag.TransactionId</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Order Status:</strong>
+                            <p class="text-success font-weight-bold">@ViewBag.OrderStatus</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Order Date:</strong>
+                            <p class="text-muted">@DateTime.Now.ToString("MMMM dd, yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Payment Method:</strong>
+                            <p class="text-muted">@ViewBag.PaymentType?.ToString().ToUpper() ?? "N/A"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Details -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Receipt Summary</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @if (ViewBag.OrderItems != null)
+                        {
+                            @foreach (var item in ViewBag.OrderItems)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @item.Name (x@item.Quantity)
+                                    <span>@item.Price.ToString("C")</span>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>Subtotal:</strong>
+                        <span>@ViewBag.Subtotal?.ToString("C") ?? "N/A"</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Tax (8%):</strong>
+                        <span>@ViewBag.Tax?.ToString("C") ?? "N/A"</span>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h5 class="d-flex justify-content-between">
+                            Total Amount:
+                            <span class="text-success">@ViewBag.Total?.ToString("C") ?? "N/A"</span>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="alert alert-info">
+                <h5>What's Next?</h5>
+                <ul class="mb-0">
+                    <li>Check your email for order confirmation and receipt</li>
+                    <li>You can track your order from your account dashboard</li>
+                    <li>For cash on delivery orders, payment will be collected during delivery</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="@Url.Action("Index", "Products")" class="btn btn-primary btn-lg">Continue Shopping</a>
+                <a href="@Url.Action("Orders", "Account")" class="btn btn-outline-primary btn-lg">View My Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0;
+        font-weight: 500;
+    }
+
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+        padding: 1rem;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+    }
+
+    h3 {
+        color: #28a745;
+        font-weight: 600;
+    }
+</style>

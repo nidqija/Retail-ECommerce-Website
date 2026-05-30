@@ -1,11 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using RetailECommerce.Services.Strategy.Payment;
+using RetailECommerce.Services.Facades;
 using System;
 
 namespace RetailECommerce.Controllers
 {
     public class CheckoutController : Controller
     {
+        private readonly CheckoutFacade _checkoutFacade;
+
+        public CheckoutController()
+        {
+            _checkoutFacade = new CheckoutFacade();
+        }
+
         // Helper method to load mock cart data so we don't repeat code
         private void LoadCartData()
         {
@@ -28,47 +35,37 @@ namespace RetailECommerce.Controllers
 
         // POST: /Checkout/Process
         [HttpPost]
-        public IActionResult Process(string paymentType, decimal totalAmount)
+        public IActionResult Process(string paymentType, decimal subtotal)
         {
-            var checkoutContext = new CheckoutContext();
+            LoadCartData();
 
-            switch (paymentType?.ToLower())
+            // Prepare cart items for notifications
+            var cartItems = new Dictionary<string, object>
             {
-                case "card":
-                    checkoutContext.SetPaymentStrategy(new CardPayment());
-                    break;
-                case "qr":
-                    checkoutContext.SetPaymentStrategy(new QRPayment());
-                    break;
-                case "cod":
-                    checkoutContext.SetPaymentStrategy(new CashOnDelivery());
-                    break;
-                default:
-                    ModelState.AddModelError("", "Invalid payment method selected.");
-                    LoadCartData(); // Reload cart data before returning to view
-                    return View("Index");
+                { "Mechanical Keyboard", 89.99m },
+                { "27\" IPS Monitor", 329.00m }
+            };
+
+            // Use the facade to process the entire checkout
+            var checkoutResult = _checkoutFacade.ProcessCheckout(
+                paymentType,
+                subtotal,
+                orderId: new Random().Next(1000, 9999), // Mock order ID
+                userId: 1, // Mock user ID
+                cartItems);
+
+            if (checkoutResult.IsSuccessful)
+            {
+                ViewBag.Message = checkoutResult.GetDisplayMessage();
+                ViewBag.TransactionId = checkoutResult.GetTransactionId();
+                ViewBag.OrderStatus = checkoutResult.GetOrderStatus();
+                ViewBag.PaymentType = paymentType;
+                ViewBag.Total = checkoutResult.TotalAmount;
+                return View("Process");
             }
-
-            try
+            else
             {
-                bool isSuccess = checkoutContext.ExecutePayment(totalAmount);
-
-                if (isSuccess)
-                {
-                    ViewBag.Message = $"Payment of {totalAmount:C} via {paymentType.ToUpper()} processed successfully!";
-                    return View("Process"); // Assuming you created the Process.cshtml view we discussed earlier
-                }
-                else
-                {
-                    ViewBag.Message = "Payment failed. Please try again.";
-                    LoadCartData(); // Reload cart data before returning to view
-                    return View("Index");
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", ex.Message);
-                LoadCartData(); // Reload cart data before returning to view
+                ModelState.AddModelError("", checkoutResult.Message);
                 return View("Index");
             }
         }
