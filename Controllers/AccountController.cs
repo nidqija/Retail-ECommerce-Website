@@ -2,19 +2,10 @@ namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
-using RetailECommerce.Services.Repository;
 
 
 public class AccountController : Controller
 {
-
-    private readonly IUserService _userService;
-
-    public AccountController(IUserService userService)
-    {
-        _userService = userService;
-    }
-    
     // GET: /Account/Orders  — customer order history
     public IActionResult Orders()
     {
@@ -60,21 +51,16 @@ public class AccountController : Controller
                 Date = DateTime.Now.AddDays(-1),
                 Total = 658.97m,
                 Status = PaymentStatus.Pending,
-                PaymentMethod = "QR Payment",
+                PaymentMethod = "PayPal",
                 EstimatedDelivery = DateTime.Now.AddDays(5),
-                TrackingNumber = (string)null,
-                Subtotal = 608.97m,
-                Tax = 50.00m,
+                TrackingNumber = "TRK-2026-004-1234",
+                Subtotal = 599.97m,
+                Tax = 59.00m,
                 Shipping = 0m,
                 Items = new[]
                 {
-                    new { ProductName = "Wireless Mouse", Quantity = 2, UnitPrice = 29.99m, Subtotal = 59.98m },
-                    new { ProductName = "USB-C Hub", Quantity = 1, UnitPrice = 49.99m, Subtotal = 49.99m },
-                    new { ProductName = "Mechanical Keyboard", Quantity = 1, UnitPrice = 89.99m, Subtotal = 89.99m },
-                    new { ProductName = "Monitor Stand", Quantity = 1, UnitPrice = 39.99m, Subtotal = 39.99m },
-                    new { ProductName = "Desk Lamp", Quantity = 1, UnitPrice = 35.99m, Subtotal = 35.99m },
-                    new { ProductName = "Keyboard Pad", Quantity = 1, UnitPrice = 24.99m, Subtotal = 24.99m }
-                }
+                    new { ProductName = "Gaming Laptop", Quantity = 1, UnitPrice = 599.97m, Subtotal = 599.97m }
+                } 
             }
         };
 
@@ -89,7 +75,7 @@ public class AccountController : Controller
             ViewBag.Order = order;
         }
 
-        PageCreator pageCreator = new AccountOrderDetailsPageCreator();
+        PageCreator pageCreator = new AccountOrderDetailPageCreator();
         return pageCreator.RenderPage(this);
     }
 
@@ -99,55 +85,4 @@ public class AccountController : Controller
         HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
     }
-
-
-// ---------------------------------------- Profile Editing ----------------------------------------
-
-    // GET: /Account/EditProfilePage
-    [HttpGet]
-    public IActionResult EditProfilePage()
-    {
-        PageCreator pageCreator = new EditProfilePageCreator();
-        return pageCreator.RenderPage(this);
-    }
-
-    // POST: /Account/EditProfile
-    [HttpPost]
-    public async Task<IActionResult> EditProfile(string fullName, string email)
-    {
-        var userEmail = HttpContext.Session.GetString("UserEmail");
-        if (string.IsNullOrEmpty(userEmail))
-        {
-            Console.WriteLine("No user email found in session. User may not be logged in.");
-            return RedirectToAction("Index", "SignIn");
-        }
-
-        var user = await _userService.GetUserByEmailAsync(userEmail);
-        if (user == null)
-        {
-            Console.WriteLine("User not found for email: " + userEmail);
-            return RedirectToAction("Index", "SignIn");
-
-        }
-
-        bool isUpdated = _userService.EditUserProfile(user.UserId, fullName, email);
-        if (isUpdated)
-        {
-            HttpContext.Session.SetString("UserEmail", email);
-            HttpContext.Session.SetString("FullName", fullName);
-            return RedirectToAction("Index", "Home");
-        }
-        else
-        {
-            ModelState.AddModelError("", "Failed to update profile. Email may already be in use.");
-            Console.WriteLine("Failed to update profile for user: " + userEmail);
-            PageCreator pageCreator = new EditProfilePageCreator();
-            return pageCreator.RenderPage(this);
-        }
-
-        
-    }
-
-//==========================================================================================================================
-
 }
