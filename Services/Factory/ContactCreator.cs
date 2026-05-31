@@ -152,3 +152,11 @@ public class EditProfilePageCreator : PageCreator
         return new EditProfilePageHandler();
     }
 }
+
+public class EnquiriesPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new EnquiriesPageHandler();
+    }
+}

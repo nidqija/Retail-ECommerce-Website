@@ -2,6 +2,9 @@ namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
+using RetailECommerce.Services.Repository;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 public class AccountController : Controller

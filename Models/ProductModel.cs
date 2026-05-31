@@ -28,4 +28,13 @@ public class Product
 
     [MaxLength(50)]
     public string SubCategory { get; set; } = "General";
+
+
+
+    // create a property to link products to enquiries
+    // same as foreign key declaration in Enquiry model
+    public ICollection<Enquiry> Enquiries { get; set; } = new List<Enquiry>();
+
+
+    
 }

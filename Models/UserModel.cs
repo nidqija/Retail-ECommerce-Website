@@ -30,6 +30,7 @@ public class User
     
     // Navigation property for related notifications
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    public ICollection<Enquiry> Enquiries { get; set; } = new List<Enquiry>();
 
     
 }

@@ -165,3 +165,11 @@ public class EditProfilePageHandler : IPageHandler
         return controller.View("~/Views/Account/EditAccount.cshtml");
     }
 }
+
+public class EnquiriesPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/Enquiries.cshtml");
+    }
+}

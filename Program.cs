@@ -4,6 +4,7 @@ using RetailECommerce.Services.Factory;
 using RetailECommerce.Data;
 using RetailECommerce.Services.Strategy.Report;
 using QuestPDF.Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
@@ -29,6 +30,15 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30); // How long the user stays logged in
     options.Cookie.HttpOnly = true; // Security: prevents JS from reading the cookie
     options.Cookie.IsEssential = true; // Required to work even if the user hasn't accepted cookies
+
+   
+});
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie( options =>
+{
+    options.Cookie.Name = "MyCookieAuth";
+    options.LoginPath = "/SignIn/Index"; // Redirect to this path if not authenticated
+    options.AccessDeniedPath = "/SignIn/Index"; // Redirect to this path if access is denied
 });
 
 
@@ -46,6 +56,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseSession(); // Enable session middleware
 
+app.UseAuthentication(); // Enable authentication middleware
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -69,6 +80,7 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedAdminAsync(context);
         await DataSeeder.SeedProductAsync(context);
         await DataSeeder.SeedPaymentAsync(context);
+        await DataSeeder.SeedEnquiryAsync(context);
         
     }
     catch (Exception ex)

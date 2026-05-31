@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 namespace RetailECommerce.Controllers;
 
 // This controller handles the sign-in page requests
@@ -13,8 +17,19 @@ public class SignInController : Controller
             _userService = userService;
     } 
 
-    public IActionResult Index() 
+    public IActionResult Index(string ? returnurl = null) 
     {
+
+        if (!string.IsNullOrEmpty(returnurl))
+        {
+            ViewBag.ShowError = true;
+            ViewBag.ErrorMessage = "You must be signed in to access that page.";
+        } else {
+            ViewBag.ShowError = false;
+        }
+
+        ViewBag.ReturnUrl = returnurl; 
+
         // One line: Logic and View selection happen in the Factory folder
         PageCreator pageCreator = new SignInPageCreator();
         return pageCreator.RenderPage(this);
@@ -44,6 +59,20 @@ public class SignInController : Controller
             HttpContext.Session.SetString("UserEmail", user.Email);
             HttpContext.Session.SetString("UserRole", user.Role.ToString());
             HttpContext.Session.SetString("FullName", user.FullName);
+
+            // create claims for the authenticated user, which will be used to create a claims identity
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("FullName", user.FullName)
+            };
+
+            // create a claims identity and sign in the user using cookie authentication
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // async method to sign in the user and create an authentication cookie that will be sent to the client
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
             Console.WriteLine("User authenticated successfully.");
             Console.WriteLine("User Password: " + user.Password);
