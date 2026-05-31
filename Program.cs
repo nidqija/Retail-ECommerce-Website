@@ -17,6 +17,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 
 // register the services in the dependency injection container to be used in the controllers
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IEnquiryRepository, EnquiryRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
