@@ -22,4 +22,17 @@ public class Product
 
     [Required]
     public int StockQuantity { get; set; }
+
+    [MaxLength(50)]
+    public string Category { get; set; } = "General";
+
+    [MaxLength(50)]
+    public string SubCategory { get; set; } = "General";
+
+    // create a property to link products to enquiries
+    // same as foreign key declaration in Enquiry model
+    public ICollection<Enquiry> Enquiries { get; set; } = new List<Enquiry>();
+
+
+    
 }

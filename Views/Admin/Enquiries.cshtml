@@ -1,0 +1,139 @@
+@{
+    ViewData["Title"] = "Admin Enquiries";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0 text-uppercase small fw-bold">Admin Panel</p>
+        <h1 class="mb-0">Enquiry Management</h1>
+    </div>
+    <div>
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Enquiry Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-light h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted small text-uppercase fw-bold mb-1">Total Enquiries</p>
+                <p class="h3 fw-bold mb-0">48</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-dark bg-warning h-100 shadow-sm">
+            <div class="card-body">
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Unread / Pending</p>
+                <p class="h3 fw-bold mb-0">7</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success h-100 shadow-sm">
+            <div class="card-body">
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Resolved</p>
+                <p class="h3 fw-bold mb-0">41</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-3" id="enquiryTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" type="button">All</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" type="button">Pending</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" type="button">Resolved</button>
+    </li>
+</ul>
+
+<!-- Enquiries Table Feed -->
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">✉️ Customer Messages (Hardcoded for now)</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 20%;">Name / Email</th>
+                        <th style="width: 20%;">Subject</th>
+                        <th style="width: 25%;">Message Preview</th>
+                        <th class="text-center" style="width: 10%;">Status</th>
+                        <th class="text-end" style="width: 10%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Just now</td>
+                        <td>
+                            <div class="fw-bold">John Doe</div>
+                            <small class="text-muted">john@example.com</small>
+                        </td>
+                        <td><span class="fw-semibold">Order Delayed</span></td>
+                        <td><span class="text-truncate d-inline-block" style="max-width: 250px;">My order #4 hasn't shipped yet. Can I get an update?</span></td>
+                        <td class="text-center"><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-controller="Admin" asp-action="EnquiryDetails" asp-route-id="4" class="btn btn-outline-primary" title="View & Reply">View</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3 hours ago</td>
+                        <td>
+                            <div class="fw-bold">Jane Smith</div>
+                            <small class="text-muted">jane.s@example.com</small>
+                        </td>
+                        <td><span class="fw-semibold">Restock Question</span></td>
+                        <td><span class="text-truncate d-inline-block" style="max-width: 250px;">When will the wireless headphones be back in stock?</span></td>
+                        <td class="text-center"><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-controller="Admin" asp-action="EnquiryDetails" asp-route-id="3" class="btn btn-outline-primary">View</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Yesterday</td>
+                        <td>
+                            <div class="fw-bold">Bob Johnson</div>
+                            <small class="text-muted">bob@example.com</small>
+                        </td>
+                        <td><span class="text-muted text-decoration-line-through">Refund Request</span></td>
+                        <td><span class="text-muted text-truncate d-inline-block" style="max-width: 250px;">I accidentally double-ordered item X. Please fix...</span></td>
+                        <td class="text-center"><span class="badge bg-success">Resolved</span></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-controller="Admin" asp-action="EnquiryDetails" asp-route-id="2" class="btn btn-outline-secondary">View</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>4 days ago</td>
+                        <td>
+                            <div class="fw-bold">Alice Brown</div>
+                            <small class="text-muted">alice.b@example.com</small>
+                        </td>
+                        <td><span class="text-muted text-decoration-line-through">Bulk Pricing</span></td>
+                        <td><span class="text-muted text-truncate d-inline-block" style="max-width: 250px;">Do you offer discounts for orders over 100 units?</span></td>
+                        <td class="text-center"><span class="badge bg-success">Resolved</span></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-controller="Admin" asp-action="EnquiryDetails" asp-route-id="1" class="btn btn-outline-secondary">View</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

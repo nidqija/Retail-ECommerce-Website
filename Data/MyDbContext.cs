@@ -17,6 +17,17 @@ public class MyDbContext : DbContext
             .WithMany(u => u.Notifications)
             .HasForeignKey(n => n.UserId);
 
+
+        modelBuilder.Entity<Enquiry>()
+            .HasOne(e => e.User)
+            .WithMany(u => u.Enquiries)
+            .HasForeignKey(e => e.UserId);
+
+        modelBuilder.Entity<Enquiry>()
+            .HasOne(e => e.Product)
+            .WithMany(p => p.Enquiries)
+            .HasForeignKey(e => e.ProductId);
+
     }
 
 
@@ -30,5 +41,7 @@ public class MyDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<Payment> Payments { get; set; }
+
+    public DbSet<Enquiry> Enquiries { get; set; }
 
 }

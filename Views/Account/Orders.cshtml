@@ -3,7 +3,7 @@
     var orders = ViewBag.Orders as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
 }
 
-<h1 class="mb-4">📋 My Orders</h1>
+<h1 class="mb-4">My Orders</h1>
 
 @if (!orders.Any())
 {
@@ -14,9 +14,9 @@ else
 {
     <div class="table-responsive">
         <table class="table table-hover align-middle">
-            <thead class="table-dark">
+            <thead class="table-lightblue">
                 <tr>
-                    <th>Order #</th>
+                    <th>Order id#</th>
                     <th>Date</th>
                     <th class="text-end">Total</th>
                     <th class="text-center">Status</th>
@@ -25,10 +25,10 @@ else
             <tbody>
                 @foreach (var o in orders)
                 {
-                    <tr>
+                    <tr class="cursor-pointer" onclick="window.location.href='@Url.Action("OrderDetail", "Account", new { orderId = o.OrderId })';" style="cursor: pointer;">
                         <td class="fw-semibold">#@o.OrderId</td>
-                        <td>@((DateTime)o.Date).ToString("MMM d, yyyy")</td>
-                        <td class="text-end">$@((decimal)o.Total).ToString("0.00")</td>
+                        <td>@(((DateTime)o.Date).ToString("MMM d, yyyy"))</td>
+                        <td class="text-end">$@(((decimal)o.Total).ToString("0.00"))</td>
                         <td class="text-center">
                             @{
                                 var status = o.Status.ToString();
@@ -49,3 +49,13 @@ else
         </table>
     </div>
 }
+
+<style>
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>

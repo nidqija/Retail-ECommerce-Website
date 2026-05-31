@@ -80,6 +80,7 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedAdminAsync(context);
         await DataSeeder.SeedProductAsync(context);
         await DataSeeder.SeedPaymentAsync(context);
+        await DataSeeder.SeedEnquiryAsync(context);
         
     }
     catch (Exception ex)

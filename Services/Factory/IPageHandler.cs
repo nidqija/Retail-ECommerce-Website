@@ -108,6 +108,14 @@ public class AccountOrdersPageHandler : IPageHandler
     }
 }
 
+public class AccountOrderDetailsPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Account/OrderDetail.cshtml");
+    }
+}
+
 // ── Admin Panel Handlers ──────────────────────────────────────────────────────
 
 public class AdminProductsPageHandler : IPageHandler
@@ -155,5 +163,13 @@ public class EditProfilePageHandler : IPageHandler
     public IActionResult Render(Controller controller)
     {
         return controller.View("~/Views/Account/EditAccount.cshtml");
+    }
+}
+
+public class EnquiriesPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/Enquiries.cshtml");
     }
 }

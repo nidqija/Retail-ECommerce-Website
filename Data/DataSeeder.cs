@@ -77,5 +77,27 @@ public class DataSeeder
         }
     }
 
+
+    public static async Task SeedEnquiryAsync(MyDbContext context)
+    {
+        await context.Database.MigrateAsync();
+
+        if (!context.Enquiries.Any())
+        {
+            var enquiries = new List<Enquiry>
+            {
+                new Enquiry { UserId = 1, ProductId = 1, Message = "Is this product available in size M?", CreatedAt = DateTime.Now },
+                new Enquiry { UserId = 1, ProductId = 2, Message = "What is the warranty period for this product?", CreatedAt = DateTime.Now.AddDays(-1) },
+                new Enquiry { UserId = 1, ProductId = 3, Message = "Can I return this product if it doesn't fit?", CreatedAt = DateTime.Now.AddDays(-2) }
+            };
+
+            context.Enquiries.AddRange(enquiries);
+            await context.SaveChangesAsync();
+        } else
+        {
+            Console.WriteLine("Enquiries already exist in the database. Skipping seeding.");
+        }
+    }
+
     
 }

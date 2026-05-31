@@ -95,6 +95,14 @@ public class AccountOrdersPageCreator : PageCreator
     }
 }
 
+public class AccountOrderDetailsPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new AccountOrderDetailsPageHandler();
+    }
+}
+
 // ── Admin Panel Creators ───────────────────────────────────────────────────
 
 public class AdminProductsPageCreator : PageCreator
@@ -142,5 +150,13 @@ public class EditProfilePageCreator : PageCreator
     public override IPageHandler CreatePageHandler()
     {
         return new EditProfilePageHandler();
+    }
+}
+
+public class EnquiriesPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new EnquiriesPageHandler();
     }
 }

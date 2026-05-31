@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,41 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace RetailECommerce.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260530150013_AddCategoryToProducts")]
+    partial class AddCategoryToProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.16");
-
-            modelBuilder.Entity("RetailECommerce.Models.Enquiry", b =>
-                {
-                    b.Property<int>("EnquiryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("EnquiryId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Enquiries");
-                });
 
             modelBuilder.Entity("RetailECommerce.Models.Notification", b =>
                 {
@@ -165,25 +139,6 @@ namespace RetailECommerce.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("RetailECommerce.Models.Enquiry", b =>
-                {
-                    b.HasOne("RetailECommerce.Models.Product", "Product")
-                        .WithMany("Enquiries")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RetailECommerce.Models.User", "User")
-                        .WithMany("Enquiries")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("RetailECommerce.Models.Notification", b =>
                 {
                     b.HasOne("RetailECommerce.Models.User", "User")
@@ -206,15 +161,8 @@ namespace RetailECommerce.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RetailECommerce.Models.Product", b =>
-                {
-                    b.Navigation("Enquiries");
-                });
-
             modelBuilder.Entity("RetailECommerce.Models.User", b =>
                 {
-                    b.Navigation("Enquiries");
-
                     b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618

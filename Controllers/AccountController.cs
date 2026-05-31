@@ -9,14 +9,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 public class AccountController : Controller
 {
-
-    private readonly IUserService _userService;
-
-    public AccountController(IUserService userService)
-    {
-        _userService = userService;
-    }
-    
     // GET: /Account/Orders  — customer order history
     public IActionResult Orders()
     {
@@ -34,6 +26,62 @@ public class AccountController : Controller
         return pageCreator.RenderPage(this);
     }
 
+    // GET: /Account/OrderDetail/{orderId} — view detailed order status and items
+    public IActionResult OrderDetail(int orderId)
+    {
+        // Mock order detail; replace with actual DB query by orderId later
+        var mockOrders = new[]
+        {
+            new {
+                OrderId = 1001,
+                Date = DateTime.Now.AddDays(-30),
+                Total = 419.98m,
+                Status = PaymentStatus.Completed,
+                PaymentMethod = "Credit Card",
+                EstimatedDelivery = DateTime.Now.AddDays(-25),
+                TrackingNumber = "TRK-2026-001-9876",
+                Subtotal = 389.98m,
+                Tax = 30.00m,
+                Shipping = 0m,
+                Items = new[]
+                {
+                    new { ProductName = "Mechanical Keyboard", Quantity = 1, UnitPrice = 89.99m, Subtotal = 89.99m },
+                    new { ProductName = "27\" IPS Monitor", Quantity = 1, UnitPrice = 329.00m, Subtotal = 329.00m }
+                }
+            },
+            new {
+                OrderId = 1004,
+                Date = DateTime.Now.AddDays(-1),
+                Total = 658.97m,
+                Status = PaymentStatus.Pending,
+                PaymentMethod = "PayPal",
+                EstimatedDelivery = DateTime.Now.AddDays(5),
+                TrackingNumber = "TRK-2026-004-1234",
+                Subtotal = 599.97m,
+                Tax = 59.00m,
+                Shipping = 0m,
+                Items = new[]
+                {
+                    new { ProductName = "Gaming Laptop", Quantity = 1, UnitPrice = 599.97m, Subtotal = 599.97m }
+                } 
+            }
+        };
+
+        var order = mockOrders.FirstOrDefault(o => o.OrderId == orderId);
+        
+        if (order == null)
+        {
+            ViewBag.Order = null;
+        }
+        else
+        {
+            ViewBag.Order = order;
+        }
+
+        PageCreator pageCreator = new AccountOrderDetailPageCreator();
+        return pageCreator.RenderPage(this);
+    }
+
     // POST: /Account/Logout
     public async Task<IActionResult> Logout()
     {
@@ -44,55 +92,4 @@ public class AccountController : Controller
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
-
-
-// ---------------------------------------- Profile Editing ----------------------------------------
-
-    // GET: /Account/EditProfilePage
-    [HttpGet]
-    public IActionResult EditProfilePage()
-    {
-        PageCreator pageCreator = new EditProfilePageCreator();
-        return pageCreator.RenderPage(this);
-    }
-
-    // POST: /Account/EditProfile
-    [HttpPost]
-    public async Task<IActionResult> EditProfile(string fullName, string email)
-    {
-        var userEmail = HttpContext.Session.GetString("UserEmail");
-        if (string.IsNullOrEmpty(userEmail))
-        {
-            Console.WriteLine("No user email found in session. User may not be logged in.");
-            return RedirectToAction("Index", "SignIn");
-        }
-
-        var user = await _userService.GetUserByEmailAsync(userEmail);
-        if (user == null)
-        {
-            Console.WriteLine("User not found for email: " + userEmail);
-            return RedirectToAction("Index", "SignIn");
-
-        }
-
-        bool isUpdated = _userService.EditUserProfile(user.UserId, fullName, email);
-        if (isUpdated)
-        {
-            HttpContext.Session.SetString("UserEmail", email);
-            HttpContext.Session.SetString("FullName", fullName);
-            return RedirectToAction("Index", "Home");
-        }
-        else
-        {
-            ModelState.AddModelError("", "Failed to update profile. Email may already be in use.");
-            Console.WriteLine("Failed to update profile for user: " + userEmail);
-            PageCreator pageCreator = new EditProfilePageCreator();
-            return pageCreator.RenderPage(this);
-        }
-
-        
-    }
-
-//==========================================================================================================================
-
 }
