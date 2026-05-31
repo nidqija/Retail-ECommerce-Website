@@ -53,6 +53,7 @@ public class ProductsController : Controller
         {
             products = products.Where(p => p.SubCategory.Equals(subCategory, StringComparison.OrdinalIgnoreCase)).ToList();
         }
+        
         var allCategories = new List<Product>
         {
             new Product { ProductId = 1, Name = "Mechanical Keyboard",  Description = "Tactile switches, full RGB backlight, detachable cable.",   Price = 89.99m,  StockQuantity = 42, Category = "Computers & Accessories", SubCategory = "Technology" },
@@ -80,7 +81,6 @@ public class ProductsController : Controller
     }
 
     // GET: /Products/Details/{id}
-
     [Authorize] // only authenticated users can access the product details page
     public IActionResult Details(int id)
     {

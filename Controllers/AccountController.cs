@@ -83,13 +83,9 @@ public class AccountController : Controller
     }
 
     // POST: /Account/Logout
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
-
         HttpContext.Session.Clear();
-
-        // clear the authentication cookie to log the user out
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
 }
