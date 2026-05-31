@@ -20,7 +20,7 @@ public class EnquiryRepository : IEnquiryRepository
 
     public Enquiry GetEnquiryById(int id)
     {
-        var enquiry = _context.Enquiries.Find(id);
+        var enquiry = _context.Enquiries.Include(e => e.User).Include(e => e.Product).FirstOrDefault(e => e.EnquiryId == id);
         
         if (enquiry == null)
         {
@@ -44,7 +44,7 @@ public class EnquiryRepository : IEnquiryRepository
 
     public void DeleteEnquiry(int id)
     {
-        var enquiry = _context.Enquiries.Find(id);
+        var enquiry = _context.Enquiries.Include(e => e.User).Include(e => e.Product).FirstOrDefault(e => e.EnquiryId == id);
         if (enquiry != null)
         {
             _context.Enquiries.Remove(enquiry);

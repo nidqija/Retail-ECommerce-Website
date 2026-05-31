@@ -10,11 +10,13 @@ public class ProductsController : Controller
 {
 
     private IProductRepository _productRepository;
+    private IEnquiryRepository _enquiryRepository;
 
 
-    public ProductsController(IProductRepository productRepository)
+    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository)
     {
         _productRepository = productRepository;
+        _enquiryRepository = enquiryRepository;
     }
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
@@ -89,6 +91,9 @@ public class ProductsController : Controller
         // update : replace the mock data with the data from the database using the repository pattern
         var productbyId = _productRepository.GetProductById(id);
         ViewBag.Product = productbyId;
+
+        var enquriesbyId = _enquiryRepository.GetAllEnquiries().Where(e => e.ProductId == id).ToList();
+        ViewBag.Enquiries = enquriesbyId;
 
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
