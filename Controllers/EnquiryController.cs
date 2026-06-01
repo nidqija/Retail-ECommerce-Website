@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
+using RetailECommerce.Services.State.Enquiry;
 
 
 public class EnquiryController : Controller
@@ -32,8 +33,34 @@ public class EnquiryController : Controller
      // it receives the enquiry object with the updated reply message from the form submission in the view
      public IActionResult UpdateEnquiry(Enquiry enquiry)
      {
-         _enquiryRepository.UpdateEnquiry(enquiry);
-         return RedirectToAction("Index");
+         var existingEnquiry = _enquiryRepository.GetEnquiryById(enquiry.EnquiryId);
+
+         if (existingEnquiry == null)
+         {
+             return NotFound();
+         }
+
+         try
+        {
+            // 5. CLIENT USAGE ( STATE MANAGER USAGE )
+            // create the state manager with the existing enquiry and submit the response through the state manager
+            var stateManager = new EnquiryStateManager(existingEnquiry);
+
+            // submit the response through the state manager which will handle the state transition 
+            // and update the enquiry status accordingly
+            stateManager.SubmitResponse(enquiry.ReplyMessage);
+
+             // update the enquiry in the repository with the new reply message and status
+            _enquiryRepository.UpdateEnquiry(existingEnquiry);
+
+            TempData["SuccessMessage"] = $"Enquiry with ID {enquiry.EnquiryId} updated successfully.";
+
+            return RedirectToAction("Index");
+        } catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error updating enquiry: {ex.Message}";
+            return RedirectToAction("Index");
+        }
      }
 
 

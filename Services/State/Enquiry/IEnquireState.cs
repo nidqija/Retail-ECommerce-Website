@@ -1,17 +1,17 @@
-namespace Services.State;
+namespace RetailECommerce.Services.State.Enquiry; 
 using RetailECommerce.Models;
 
-
+// 1. STATE INTERFACE
+// define the contract for different states of an enquiry
+// define the methods needed to be implemented by each state (Pending, Replied, Closed)
 public interface IEnquireState
 {
-    // getter for current state name
     string StatusName { get; }
 
-    // method to advance to the next state
-    void AdvanceState(EnquiryStateManager manager);
+    void SubmitResponse(EnquiryStateManager manager, string replyMessage);
 
-    // method to cancel the enquiry and move to Cancelled state
-    void Cancel(EnquiryStateManager manager);
+
+    void CloseEnquiry(EnquiryStateManager manager);
 
 
 }
