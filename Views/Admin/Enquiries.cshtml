@@ -103,12 +103,14 @@
                                                 <span class="text-muted font-monospace">ID: @enquiry.ProductId</span>
                                             }
                                     </td>
+
                                     
                                 <td><span class="text-truncate d-inline-block" style="max-width: 250px;">@enquiry.Message</span></td>
                                
-                                <td class="text-center">-</td>
+                                <td class="text-center">@enquiry.Status</td>
                                 <td class="text-end"></td>
-                                <td><a href="#" class="btn btn-sm btn-outline-primary">View</a></td>
+                                <td><a asp-controller="Products" asp-action="Details" asp-route-id="@enquiry.ProductId">View</a></td>
+                                
                             </tr>
                             
                         }

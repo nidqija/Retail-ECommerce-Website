@@ -86,9 +86,9 @@ public class DataSeeder
         {
             var enquiries = new List<Enquiry>
             {
-                new Enquiry { UserId = 1, ProductId = 1, Message = "Is this product available in size M?", CreatedAt = DateTime.Now },
-                new Enquiry { UserId = 1, ProductId = 2, Message = "What is the warranty period for this product?", CreatedAt = DateTime.Now.AddDays(-1) },
-                new Enquiry { UserId = 1, ProductId = 3, Message = "Can I return this product if it doesn't fit?", CreatedAt = DateTime.Now.AddDays(-2) }
+                new Enquiry { UserId = 1, ProductId = 1, Message = "Is this product available in size M?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now },
+                new Enquiry { UserId = 1, ProductId = 2, Message = "What is the warranty period for this product?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-1) },
+                new Enquiry { UserId = 1, ProductId = 3, Message = "Can I return this product if it doesn't fit?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-2) }
             };
 
             context.Enquiries.AddRange(enquiries);
