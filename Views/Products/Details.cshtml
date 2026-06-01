@@ -70,7 +70,8 @@ else
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link fw-semibold text-dark" id="questions-tab" data-bs-toggle="tab" data-bs-target="#questions-panel" type="button" role="tab" aria-controls="questions-panel" aria-selected="false">
-                    🙋 Questions & Answers (2)
+                    
+                    🙋 Questions & Answers ( @enquiries?.Count )
                 </button>
             </li>
         </ul>
@@ -135,7 +136,12 @@ else
 
                                   @if(User.IsInRole("Vendor")){
                                         <div class="mt-2">
-                                            <span class="badge bg-secondary">Status: @enquiry.Status</span>
+                                            @if(enquiry.Status == "Pending"){
+                                                 <span class="badge bg-warning">Status: @enquiry.Status</span>
+                                            }else if(enquiry.Status == "Replied"){
+                                                 <span class="badge bg-success">Status: @enquiry.Status</span>
+                                            }
+
                                             @if(enquiry.Status == "Pending"){
                                                 <div class="d-flex justify-content-end">
                                                 <button class="btn btn-sm btn-outline-success ms-3" data-bs-toggle="modal" data-bs-target="#replyModal-@enquiry.EnquiryId">Reply</button>
@@ -172,7 +178,9 @@ else
                                                         </div>
                                                     </div>
                                                     </div>
-                                            }
+                                            } 
+
+                                         
                                         </div>
                                   }
 

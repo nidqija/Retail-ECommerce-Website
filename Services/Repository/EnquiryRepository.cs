@@ -42,6 +42,7 @@ public class EnquiryRepository : IEnquiryRepository
         if (existingEnquiry != null)
         {
             existingEnquiry.ReplyMessage = enquiry.ReplyMessage;
+            existingEnquiry.Status = enquiry.Status;
            
             _context.SaveChanges();
             Console.WriteLine($"Enquiry with ID {enquiry.EnquiryId} updated successfully with this reply message : {enquiry.ReplyMessage}");
