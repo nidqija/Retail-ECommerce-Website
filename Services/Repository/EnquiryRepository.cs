@@ -38,8 +38,14 @@ public class EnquiryRepository : IEnquiryRepository
 
     public void UpdateEnquiry(Enquiry enquiry)
     {
-        _context.Enquiries.Update(enquiry);
-        _context.SaveChanges();
+        var existingEnquiry = _context.Enquiries.Include(e => e.User).Include(e => e.Product).FirstOrDefault(e => e.EnquiryId == enquiry.EnquiryId);
+        if (existingEnquiry != null)
+        {
+            existingEnquiry.ReplyMessage = enquiry.ReplyMessage;
+           
+            _context.SaveChanges();
+            Console.WriteLine($"Enquiry with ID {enquiry.EnquiryId} updated successfully with this reply message : {enquiry.ReplyMessage}");
+        }
     }
 
     public void DeleteEnquiry(int id)

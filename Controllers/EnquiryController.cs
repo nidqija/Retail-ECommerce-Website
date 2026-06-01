@@ -19,15 +19,25 @@ public class EnquiryController : Controller
 
     public IActionResult Index()
     {
-        
         var enquiries = _enquiryRepository.GetAllEnquiries();
         ViewBag.Enquiries = enquiries;
-
-
-
         PageCreator pageCreator = new EnquiriesPageCreator();
         return pageCreator.RenderPage(this);
      }
+
+
+
+     [HttpPost]
+     // this action method for submiting a reply to an enquiry,
+     // it receives the enquiry object with the updated reply message from the form submission in the view
+     public IActionResult UpdateEnquiry(Enquiry enquiry)
+     {
+         _enquiryRepository.UpdateEnquiry(enquiry);
+         return RedirectToAction("Index");
+     }
+
+
+
 
 
 }

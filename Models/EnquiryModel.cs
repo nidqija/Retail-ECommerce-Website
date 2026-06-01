@@ -27,6 +27,14 @@ public class Enquiry
     [MaxLength(1000)]
     public string Message { get; set; } = string.Empty;
 
+
+    [MaxLength(1000)]
+    public string ReplyMessage { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(50)]
+    public string Status {get; set;} = "Pending";
+
     [Required]  
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
