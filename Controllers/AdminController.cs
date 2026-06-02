@@ -1,11 +1,20 @@
 namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
-
+using RetailECommerce.Services.Repository;
 
 public class AdminController : Controller
 {
+    private readonly MyDbContext _context;
+    private readonly IProductRepository _productRepository;
+
+    public AdminController(MyDbContext context, IProductRepository productRepository)
+    {
+        _context = context;
+        _productRepository = productRepository;
+    }
     // GET: /Admin  — Admin hub / overview
     public IActionResult Index()
     {
@@ -16,17 +25,8 @@ public class AdminController : Controller
     // GET: /Admin/Products  — product data table
     public IActionResult Products()
     {
-        // Hardcoded mock data; replace with DB call later
-        var products = new List<Product>
-        {
-            new Product { ProductId = 1, Name = "Mechanical Keyboard",  Description = "Tactile switches, RGB backlit.", Price = 89.99m,  StockQuantity = 42 },
-            new Product { ProductId = 2, Name = "Wireless Mouse",       Description = "Ergonomic, 3000 DPI.",         Price = 39.99m,  StockQuantity = 78 },
-            new Product { ProductId = 3, Name = "USB-C Hub (7-in-1)",   Description = "HDMI, USB-A, SD, PD.",        Price = 29.99m,  StockQuantity = 5  },
-            new Product { ProductId = 4, Name = "27\" Monitor",          Description = "1440p IPS, 165 Hz.",          Price = 329.00m, StockQuantity = 12 },
-        };
-
+        var products = _productRepository.GetAllProducts();
         PageCreator pageCreator = new AdminProductsPageCreator();
-        // Pass model data via ViewBag so the Factory handler can still own view selection
         ViewBag.Products = products;
         return pageCreator.RenderPage(this);
     }
@@ -38,45 +38,59 @@ public class AdminController : Controller
         return pageCreator.RenderPage(this);
     }
 
-    // POST: /Admin/CreateProduct  — stub: redirects back to Products table
+    // POST: /Admin/CreateProduct
     [HttpPost]
     public IActionResult CreateProduct(Product product)
     {
-        // Future: validate and save to DB via repository
-        return RedirectToAction("Products");
+        if (ModelState.IsValid)
+        {
+            _productRepository.AddProduct(product);
+            return RedirectToAction("Products");
+        }
+        PageCreator pageCreator = new AdminCreateProductPageCreator();
+        return pageCreator.RenderPage(this);
     }
 
-    // GET: /Admin/EditProduct/{id}  — pre-filled edit form
+    // GET: /Admin/EditProduct/{id}
     public IActionResult EditProduct(int id)
     {
-        // Mock single product; replace with DB lookup
-        var product = new Product
-        {
-            ProductId = id,
-            Name = "Sample Product",
-            Description = "This is a mock product description for editing.",
-            Price = 49.99m,
-            StockQuantity = 20
-        };
+        var product = _productRepository.GetProductById(id);
+        if (product == null) return NotFound();
 
         ViewBag.Product = product;
         PageCreator pageCreator = new AdminEditProductPageCreator();
         return pageCreator.RenderPage(this);
     }
 
-    // POST: /Admin/EditProduct/{id}  — stub: redirects back to Products table
+    // POST: /Admin/DeleteProduct/{id}
     [HttpPost]
-    public IActionResult EditProduct(int id, Product product)
+    public IActionResult DeleteProduct(int id)
     {
-        // Future: validate and update in DB via repository
+        _productRepository.DeleteProduct(id);
         return RedirectToAction("Products");
     }
 
-    // GET: /Admin/Orders  — all orders table
+    // POST: /Admin/EditProduct/{id}
+    [HttpPost]
+    public IActionResult EditProduct(int id, Product product)
+    {
+        if (id != product.ProductId) return BadRequest();
+
+        if (ModelState.IsValid)
+        {
+            _productRepository.UpdateProduct(product);
+            return RedirectToAction("Products");
+        }
+        ViewBag.Product = product;
+        PageCreator pageCreator = new AdminEditProductPageCreator();
+        return pageCreator.RenderPage(this);
+    }
+
+    // GET: /Admin/Orders
     public IActionResult Orders()
     {
-        // Hardcoded mock order data
-        ViewBag.Orders = GetMockOrders();
+        var orders = _context.Payments.Include(p => p.User).ToList();
+        ViewBag.Orders = orders;
         PageCreator pageCreator = new AdminOrdersPageCreator();
         return pageCreator.RenderPage(this);
     }
@@ -84,33 +98,37 @@ public class AdminController : Controller
     // GET: /Admin/OrderDetails/{id}
     public IActionResult OrderDetails(int id)
     {
-        // Return a single mock order by ID (just uses first mock for now)
-        var order = GetMockOrders().FirstOrDefault(o => o.Id == id)
-                    ?? GetMockOrders().First();
+        var order = _context.Payments.Include(p => p.User).FirstOrDefault(o => o.Id == id);
+        if (order == null) return NotFound();
+
         ViewBag.Order = order;
         PageCreator pageCreator = new AdminOrderDetailsPageCreator();
         return pageCreator.RenderPage(this);
     }
 
-    // POST: /Admin/UpdateOrderStatus  — stub status change
+    // POST: /Admin/UpdateOrderStatus
     [HttpPost]
     public IActionResult UpdateOrderStatus(int id, PaymentStatus status)
     {
-        // Future: update status in DB
+        var order = _context.Payments.Find(id);
+        if (order != null)
+        {
+            order.PaymentStatus = status;
+            _context.SaveChanges();
+        }
         return RedirectToAction("OrderDetails", new { id });
     }
 
-    // --- Private helpers -------------------------------------------------
-
-    private static List<Payment> GetMockOrders()
+    // GET: /Admin/Enquiries
+    public IActionResult Enquiries()
     {
-        return new List<Payment>
-        {
-            new Payment { Id = 1, Total_Amount = 419.98m, PaymentDate = DateTime.Now.AddDays(-5),  PaymentStatus = PaymentStatus.Completed, PaymentMethod = PaymentMethod.CreditCard },
-            new Payment { Id = 3, Total_Amount = 29.99m,  PaymentDate = DateTime.Now.AddDays(-1),  PaymentStatus = PaymentStatus.Failed,    PaymentMethod = PaymentMethod.CreditCard  },
-            new Payment { Id = 4, Total_Amount = 658.97m, PaymentDate = DateTime.Now.AddHours(-3), PaymentStatus = PaymentStatus.Pending,   PaymentMethod = PaymentMethod.PayPal      },
-        };
+        var enquiries = _context.Enquiries
+            .Include(e => e.User)
+            .Include(e => e.Product)
+            .ToList();
+            
+        ViewBag.Enquiries = enquiries;
+        PageCreator pageCreator = new EnquiriesPageCreator();
+        return pageCreator.RenderPage(this);
     }
-
-    
 }
