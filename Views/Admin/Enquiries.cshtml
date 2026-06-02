@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Admin Enquiries";
+    var enquiries = ViewBag.Enquiries as List<RetailECommerce.Models.Enquiry>;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -20,15 +21,15 @@
         <div class="card bg-light h-100 shadow-sm">
             <div class="card-body">
                 <p class="text-muted small text-uppercase fw-bold mb-1">Total Enquiries</p>
-                <p class="h3 fw-bold mb-0">48</p>
+                <p class="h3 fw-bold mb-0">@enquiries.Count</p>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card text-dark bg-warning h-100 shadow-sm">
             <div class="card-body">
-                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Unread / Pending</p>
-                <p class="h3 fw-bold mb-0">7</p>
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Pending</p>
+                <p class="h3 fw-bold mb-0">@enquiries.Count(e => e.Status == "Pending")</p>
             </div>
         </div>
     </div>
@@ -36,7 +37,7 @@
         <div class="card text-white bg-success h-100 shadow-sm">
             <div class="card-body">
                 <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Resolved</p>
-                <p class="h3 fw-bold mb-0">41</p>
+                <p class="h3 fw-bold mb-0">@enquiries.Count(e => e.Status == "Resolved")</p>
             </div>
         </div>
     </div>
@@ -63,23 +64,23 @@
             <table class="table align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 15%;">Date</th>
-                        <th style="width: 20%;">Name</th>
+                       <th style="width: 15%;">Date</th>
+                        <th style="width: 15%;">Customer</th>
                         <th style="width: 20%;">Product</th>
-                        <th style="width: 25%;">Message</th>
-                        <th class="text-center" style="width: 10%;">Status</th>
-                        <th class="text-end" style="width: 10%;">Actions</th>
-                        <th class="text-end" style="width: 10%;"></th>
+                        <th style="width: 30%;">Message</th>
+                        <th style="width: 10%;" class="text-center">Status</th>
+                        <th style="width: 10%;" class="text-center">Actions</th>
+                        <th style="width: 10%;" class="text-center">Closure</th>
                     </tr>
                 </thead>
                 <tbody>
-                     @{
-                        var enquiries = ViewBag.Enquiries as List<RetailECommerce.Models.Enquiry>;
-                        var users = ViewBag.Users as List<RetailECommerce.Models.User>;
-                     }
+                     
 
                     @if (enquiries != null && enquiries.Count > 0){
+                        
                         foreach (var enquiry in enquiries){
+
+                            
                             <tr> 
                                 <td>@enquiry.CreatedAt.ToString("g")</td>
 
@@ -108,9 +109,35 @@
                                 <td><span class="text-truncate d-inline-block" style="max-width: 250px;">@enquiry.Message</span></td>
                                
                                 <td class="text-center">@enquiry.Status</td>
-                                <td class="text-end"></td>
-                                <td><a asp-controller="Products" asp-action="Details" asp-route-id="@enquiry.ProductId">View</a></td>
-                                
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@enquiry.ProductId" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                            View
+                                        </a>
+                                    </div>
+                                </td>
+
+                                @if(enquiry.Status == "Replied"){
+                                     <td class="text-center">
+                                          <div class="btn-group" role="group">
+                                            <form method="post" asp-controller="Enquiry" asp-action= "CloseEnquiry" asp-route-id="@enquiry.ProductId">
+                                              <input type="hidden" name="enquiryId" value="@enquiry.EnquiryId" />
+                                              <input type="hidden" name="productId" value="@enquiry.ProductId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2">
+                                                        Close Enquiry
+                                                    </button>
+                                             </form>
+                                           </div>
+                                      </td>
+                                }
+
+                                @if(enquiry.Status == "Closed"){
+                                    <td>
+                                        <span class="badge bg-success">Closed</span>
+                                    </td>
+                                }
+                               
+
                             </tr>
                             
                         }
