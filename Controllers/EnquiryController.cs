@@ -64,6 +64,39 @@ public class EnquiryController : Controller
      }
 
 
+     [HttpPost]
+     public IActionResult CloseEnquiry(int enquiryId)
+    {
+        var existingEnquiry = _enquiryRepository.GetEnquiryById(enquiryId);
+
+        if (existingEnquiry == null)
+        {
+            return NotFound();
+        }
+
+
+        try
+        {
+           var stateManager = new EnquiryStateManager(existingEnquiry);
+
+
+           stateManager.CloseEnquiry();
+
+            _enquiryRepository.UpdateEnquiry(existingEnquiry);
+
+            TempData["SuccessMessage"] = $"Enquiry with ID {enquiryId} closed successfully.";
+
+            return RedirectToAction("Index"); 
+        } 
+        
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error closing enquiry: {ex.Message}";
+            return RedirectToAction("Index");
+        }
+    }
+
+
 
 
 
