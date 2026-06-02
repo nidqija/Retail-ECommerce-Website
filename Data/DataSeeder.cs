@@ -13,7 +13,7 @@ public class DataSeeder
         // Check if there are any users in the database
         if (!context.Users.Any())
         {
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Admin@123");
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword("admin123");
             // If not, create a default admin user
             var adminUser = new User
             {
