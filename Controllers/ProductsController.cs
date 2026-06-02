@@ -2,6 +2,8 @@ namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
+using RetailECommerce.Data;
+using RetailECommerce.ViewModels;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 
@@ -12,11 +14,14 @@ public class ProductsController : Controller
     private IProductRepository _productRepository;
     private IEnquiryRepository _enquiryRepository;
 
+    private readonly MyDbContext _context;
 
-    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository)
+
+    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository, MyDbContext context)
     {
         _productRepository = productRepository;
         _enquiryRepository = enquiryRepository;
+        _context = context;
     }
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
@@ -95,10 +100,46 @@ public class ProductsController : Controller
         var enquriesbyId = _enquiryRepository.GetAllEnquiries().Where(e => e.ProductId == id).ToList();
         ViewBag.Enquiries = enquriesbyId;
 
+        var reviewsById = _context.Reviews
+            .Where(r => r.ProductId == id)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
+
+        ViewBag.Reviews = reviewsById;
+
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
     }
 
+    
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public IActionResult SubmitReview(SubmitReviewViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["ReviewError"] = "Please select a rating and keep your comment within 500 characters.";
+            return RedirectToAction("Details", new { id = model.ProductId });
+        }
+
+        int userId = 1;
+
+        var review = new Review
+        {
+            ProductId = model.ProductId,
+            UserId = userId,
+            Rating = model.Rating,
+            Comment = model.Comment ?? string.Empty,
+            CreatedAt = DateTime.Now
+        };
+
+        _context.Reviews.Add(review);
+        _context.SaveChanges();
+
+        TempData["ReviewMessage"] = "Your feedback and review has been submitted.";
+        return RedirectToAction("Details", new { id = model.ProductId });
+    }
 
     
 }

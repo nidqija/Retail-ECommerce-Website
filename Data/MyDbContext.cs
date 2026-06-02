@@ -28,6 +28,16 @@ public class MyDbContext : DbContext
             .WithMany(p => p.Enquiries)
             .HasForeignKey(e => e.ProductId);
 
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Product)
+            .WithMany(p => p.Reviews)
+            .HasForeignKey(r => r.ProductId);
+
     }
 
 
@@ -43,5 +53,7 @@ public class MyDbContext : DbContext
     public DbSet<Payment> Payments { get; set; }
 
     public DbSet<Enquiry> Enquiries { get; set; }
+
+    public DbSet<Review> Reviews { get; set; }
 
 }

@@ -13,6 +13,22 @@
                 </div>
             </div>
 
+            @if (ViewBag.PendingNotification != null)
+            {
+                <div class="alert alert-warning mt-3">
+                <strong>Payment Pending:</strong>
+                <p class="mb-0">@ViewBag.PendingNotification</p>
+                </div>
+            }
+
+            @if (ViewBag.PaymentNotification != null)
+            {           
+                <div class="alert alert-info mt-3">
+                   <strong>Payment Notification:</strong>
+                   <p class="mb-0">@ViewBag.PaymentNotification</p>
+                 </div>
+            }
+
             <!-- Order Details Card -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-success text-white">
