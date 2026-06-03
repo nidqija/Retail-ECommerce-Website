@@ -173,3 +173,12 @@ public class EnquiriesPageHandler : IPageHandler
         return controller.View("~/Views/Admin/Enquiries.cshtml");
     }
 }
+
+
+public class ReviewsPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/Review.cshtml");
+    }
+}
