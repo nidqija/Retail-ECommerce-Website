@@ -14,15 +14,21 @@ public class ProductsController : Controller
     private IProductRepository _productRepository;
     private IEnquiryRepository _enquiryRepository;
 
-    private readonly MyDbContext _context;
+private readonly MyDbContext _context;
+private readonly IReviewRepository _reviewRepository;
 
+public ProductsController(
+    IProductRepository productRepository,
+    IEnquiryRepository enquiryRepository,
+    IReviewRepository reviewRepository,
+    MyDbContext context)
+{
+    _productRepository = productRepository;
+    _enquiryRepository = enquiryRepository;
+    _reviewRepository = reviewRepository;
+    _context = context;
+}
 
-    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository, MyDbContext context)
-    {
-        _productRepository = productRepository;
-        _enquiryRepository = enquiryRepository;
-        _context = context;
-    }
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
     {
@@ -100,7 +106,7 @@ public class ProductsController : Controller
         var enquriesbyId = _enquiryRepository.GetAllEnquiries().Where(e => e.ProductId == id).ToList();
         ViewBag.Enquiries = enquriesbyId;
 
-        var reviewsById = _context.Reviews
+        var reviewsById = _reviewRepository.GetAllReviews()
             .Where(r => r.ProductId == id)
             .OrderByDescending(r => r.CreatedAt)
             .ToList();

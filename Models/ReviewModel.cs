@@ -9,23 +9,31 @@ public class Review
     public int ReviewId { get; set; }
 
     [Required]
+    public int UserId { get; set; }
+
+    [Required]
     public int ProductId { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; } = null!;
 
     [ForeignKey(nameof(ProductId))]
     public Product Product { get; set; } = null!;
 
     [Required]
-    public int UserId { get; set; }
-
-    [ForeignKey(nameof(UserId))]
-    public User User { get; set; } = null!;
-
-    [Required]
     [Range(1, 5)]
     public int Rating { get; set; }
 
-    [MaxLength(500)]
+    [Required]
+    [MaxLength(1000)]
     public string Comment { get; set; } = string.Empty;
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    [MaxLength(1000)]
+    public string? VendorReply { get; set; }
+
+    [MaxLength(1000)]
+    public string? Status { get; set; } = "Pending";
+
+    [Required]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -21,7 +21,15 @@
         <div class="card bg-light h-100 shadow-sm">
             <div class="card-body">
                 <p class="text-muted small text-uppercase fw-bold mb-1">Total Enquiries</p>
+
+                @if (enquiries == null)
+                {
+                    <p class="h3 fw-bold mb-0">0</p>
+                }
+                else
+                {
                 <p class="h3 fw-bold mb-0">@enquiries.Count</p>
+                }
             </div>
         </div>
     </div>
@@ -29,7 +37,15 @@
         <div class="card text-dark bg-warning h-100 shadow-sm">
             <div class="card-body">
                 <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Pending</p>
+
+                @if (enquiries == null)
+                {
+                    <p class="h3 fw-bold mb-0">0</p>
+                }
+                else
+                {
                 <p class="h3 fw-bold mb-0">@enquiries.Count(e => e.Status == "Pending")</p>
+                }
             </div>
         </div>
     </div>
@@ -37,7 +53,14 @@
         <div class="card text-white bg-success h-100 shadow-sm">
             <div class="card-body">
                 <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Resolved</p>
-                <p class="h3 fw-bold mb-0">@enquiries.Count(e => e.Status == "Resolved")</p>
+                @if (enquiries == null)
+                {
+                    <p class="h3 fw-bold mb-0">0</p>
+                }
+                else
+                {
+                    <p class="h3 fw-bold mb-0">@enquiries.Count(e => e.Status == "Closed")</p>
+                }
             </div>
         </div>
     </div>

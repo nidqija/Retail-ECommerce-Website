@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Admin Dashboard - Product Reviews";
+    var reviews = ViewBag.Reviews as List<RetailECommerce.Models.Review>;
+    
+    // Pre-calculate counts to keep the HTML clean
+    var totalCount = reviews?.Count ?? 0;
+    
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0 text-uppercase small fw-bold">Admin Panel</p>
+        <h1 class="mb-0">Product Reviews Management</h1>
+    </div>
+    <div>
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-light h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted small text-uppercase fw-bold mb-1">Total Reviews</p>
+                <p class="h3 fw-bold mb-0">4</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-dark bg-warning h-100 shadow-sm">
+            <div class="card-body">
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Pending Moderation</p>
+                <p class="h3 fw-bold mb-0">2</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success h-100 shadow-sm">
+            <div class="card-body">
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Approved Reviews</p>
+                <p class="h3 fw-bold mb-0">1</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" id="reviewTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" type="button">All Reviews</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" type="button">Pending</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" type="button">Approved</button>
+    </li>
+</ul>
+
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">⭐ Customer Product Reviews</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 15%;">Customer</th>
+                        <th style="width: 20%;">Product</th>
+                        <th style="width: 30%;">Review Comment</th>
+                        <th style="width: 10%;" class="text-center">Status</th>
+                        <th style="width: 10%;" class="text-center">Actions</th>
+                        <th style="width: 10%;" class="text-center">Closure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (totalCount == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <p class="mb-0 fw-semibold">There are no reviews available.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var review in reviews!)
+                        {
+                            <tr> 
+                                <td>@review.CreatedAt.ToString("g")</td>
+                                <td>@(review.User?.FullName ?? "Unknown User")</td>
+                                <td>@(review.Product?.Name ?? "Unknown Product")</td>
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 250px;" title="@review.Comment">
+                                        @review.Comment
+                                    </span>
+                                </td>
+                                
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@review.ProductId" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                            View
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    pending
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

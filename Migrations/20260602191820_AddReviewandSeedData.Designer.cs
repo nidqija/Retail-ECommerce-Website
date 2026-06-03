@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace RetailECommerce.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260602191820_AddReviewandSeedData")]
+    partial class AddReviewandSeedData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.16");
@@ -158,14 +161,7 @@ namespace RetailECommerce.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
-
-
-                    b.Property<int>("Rating")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
@@ -175,7 +171,10 @@ namespace RetailECommerce.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
+                    b.Property<int>("rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("status")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
@@ -260,7 +259,7 @@ namespace RetailECommerce.Migrations
             modelBuilder.Entity("RetailECommerce.Models.Review", b =>
                 {
                     b.HasOne("RetailECommerce.Models.Product", "Product")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -279,8 +278,6 @@ namespace RetailECommerce.Migrations
             modelBuilder.Entity("RetailECommerce.Models.Product", b =>
                 {
                     b.Navigation("Enquiries");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("RetailECommerce.Models.User", b =>

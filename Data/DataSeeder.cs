@@ -99,5 +99,28 @@ public class DataSeeder
         }
     }
 
+
+    public static async Task SeedReviewAsync(MyDbContext context)
+    {
+        await context.Database.MigrateAsync();
+
+        if (!context.Reviews.Any())
+        {
+            var reviews = new List<Review>
+            {
+                new Review { UserId = 1, ProductId = 1, Rating = 5, Comment = "Great product!", VendorReply = "", CreatedAt = DateTime.UtcNow },
+                new Review { UserId = 1, ProductId = 2, Rating = 4, Comment = "Good quality.", VendorReply = "", CreatedAt = DateTime.UtcNow },
+                new Review { UserId = 1, ProductId = 3, Rating = 3, Comment = "Average product.", VendorReply = "", CreatedAt = DateTime.UtcNow }
+            };
+
+            context.Reviews.AddRange(reviews);
+            await context.SaveChangesAsync();
+        } else
+        {
+            Console.WriteLine("Reviews already exist in the database. Skipping seeding.");
+        }
+    }
+
+
     
 }
