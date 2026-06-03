@@ -13,5 +13,10 @@ public interface IReviewRepository
 
     Review GetReviewByProduct(int productId);
 
+
+    void UpdateReview(Review review);
+
+    void DeleteVendorReply(int reviewId);
+
   
 }
