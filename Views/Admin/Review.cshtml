@@ -105,7 +105,18 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    pending
+                                    @if (review.status == "Pending")
+                                    {
+                                        <span class="badge bg-warning">Pending</span>
+                                    }
+                                    else if (review.status == "Replied")
+                                    {
+                                        <span class="badge bg-info">Replied</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Unknown</span>
+                                    }
                                 </td>
                             </tr>
                         }
