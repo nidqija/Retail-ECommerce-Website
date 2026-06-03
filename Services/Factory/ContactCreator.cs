@@ -160,3 +160,11 @@ public class EnquiriesPageCreator : PageCreator
         return new EnquiriesPageHandler();
     }
 }
+
+public class ReviewsPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new ReviewsPageHandler();
+    }
+}

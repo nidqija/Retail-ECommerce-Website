@@ -44,4 +44,7 @@ public class MyDbContext : DbContext
 
     public DbSet<Enquiry> Enquiries { get; set; }
 
+
+    public DbSet<Review> Reviews { get; set; }
+
 }

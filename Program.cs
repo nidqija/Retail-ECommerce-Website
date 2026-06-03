@@ -18,6 +18,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 // register the services in the dependency injection container to be used in the controllers
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IEnquiryRepository, EnquiryRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
@@ -82,6 +83,8 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedProductAsync(context);
         await DataSeeder.SeedPaymentAsync(context);
         await DataSeeder.SeedEnquiryAsync(context);
+        await DataSeeder.SeedReviewAsync(context);
+        
         
     }
     catch (Exception ex)

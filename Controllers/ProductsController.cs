@@ -12,11 +12,15 @@ public class ProductsController : Controller
     private IProductRepository _productRepository;
     private IEnquiryRepository _enquiryRepository;
 
+    private IReviewRepository _reviewRepository;
 
-    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository)
+
+
+    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository  , IReviewRepository reviewRepository)
     {
         _productRepository = productRepository;
         _enquiryRepository = enquiryRepository;
+        _reviewRepository = reviewRepository;
     }
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
@@ -94,6 +98,12 @@ public class ProductsController : Controller
 
         var enquriesbyId = _enquiryRepository.GetAllEnquiries().Where(e => e.ProductId == id).ToList();
         ViewBag.Enquiries = enquriesbyId;
+
+        var reviewsbyId = _reviewRepository.GetAllReviews().Where(r => r.ProductId == id).ToList();
+        ViewBag.Reviews = reviewsbyId;
+
+
+
 
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
