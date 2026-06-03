@@ -121,8 +121,45 @@ public class DataSeeder
         }
     }
 
-    
-    
+    public static async Task SeedOrderAsync(MyDbContext context)
+    {
+        await context.Database.MigrateAsync();
 
-    
+        if (!context.Orders.Any())
+        {
+            var orders = new List<Order>
+            {
+                new Order 
+                { 
+                    UserId = 1, 
+                    OrderDate = DateTime.Now.AddDays(-1), 
+                    TotalAmount = 89.97m, 
+                    OrderStatus = "Completed",
+                    OrderItems = new List<OrderItem>
+                    {
+                        new OrderItem { ProductId = 1, Quantity = 2, UnitPrice = 19.99m },
+                        new OrderItem { ProductId = 2, Quantity = 1, UnitPrice = 49.99m }
+                    }
+                },
+                new Order 
+                { 
+                    UserId = 1, 
+                    OrderDate = DateTime.Now, 
+                    TotalAmount = 79.99m, 
+                    OrderStatus = "Pending",
+                    OrderItems = new List<OrderItem>
+                    {
+                        new OrderItem { ProductId = 3, Quantity = 1, UnitPrice = 79.99m }
+                    }
+                }
+            };
+
+            context.Orders.AddRange(orders);
+            await context.SaveChangesAsync();
+        } 
+        else
+        {
+            Console.WriteLine("Orders already exist in the database. Skipping seeding.");
+        }
+    }
 }

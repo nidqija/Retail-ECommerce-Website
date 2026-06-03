@@ -1,7 +1,7 @@
 @{
     ViewData["Title"] = "Order Management";
-    var orders = ViewBag.Orders as IEnumerable<RetailECommerce.Models.Payment>
-                 ?? Enumerable.Empty<RetailECommerce.Models.Payment>();
+    var orders = ViewBag.Orders as IEnumerable<RetailECommerce.Models.Order>
+                 ?? Enumerable.Empty<RetailECommerce.Models.Order>();
 }
 
 <h1 class="mb-4">Order Management</h1>
@@ -14,7 +14,7 @@
                     <tr>
                         <th>Order #</th>
                         <th>Date</th>
-                        <th>Payment Method</th>
+                        <th>Customer</th>
                         <th class="text-end">Amount</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Details</th>
@@ -25,21 +25,20 @@
                     {
                         <tr>
                             <td class="fw-semibold">#@o.Id</td>
-                            <td>@o.PaymentDate.ToString("MMM d, yyyy HH:mm")</td>
-                            <td>@o.PaymentMethod</td>
-                            <td class="text-end">$@o.Total_Amount.ToString("0.00")</td>
+                            <td>@o.OrderDate.ToString("MMM d, yyyy HH:mm")</td>
+                            <td>@o.User?.FullName</td>
+                            <td class="text-end">$@o.TotalAmount.ToString("0.00")</td>
                             <td class="text-center">
                                 @{
-                                    var badgeClass = o.PaymentStatus switch
+                                    var badgeClass = o.OrderStatus switch
                                     {
-                                        RetailECommerce.Models.PaymentStatus.Completed => "bg-success",
-                                        RetailECommerce.Models.PaymentStatus.Pending   => "bg-warning text-dark",
-                                        RetailECommerce.Models.PaymentStatus.Failed    => "bg-danger",
-                                        RetailECommerce.Models.PaymentStatus.Refunded  => "bg-info text-dark",
-                                        _                                               => "bg-secondary"
+                                        "Completed" => "bg-success",
+                                        "Pending"   => "bg-warning text-dark",
+                                        "Cancelled" => "bg-danger",
+                                        _           => "bg-secondary"
                                     };
                                 }
-                                <span class="badge @badgeClass">@o.PaymentStatus</span>
+                                <span class="badge @badgeClass">@o.OrderStatus</span>
                             </td>
                             <td class="text-center">
                                 <a asp-controller="Admin" asp-action="OrderDetails"
