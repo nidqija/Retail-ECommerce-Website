@@ -43,9 +43,7 @@ namespace RetailECommerce.Controllers
             int userId = 1;
             int orderId = new Random().Next(1000, 9999);
 
-            ViewBag.PendingNotification =
-                $"Payment for Order #{orderId} is currently pending and being processed.";
-
+           
             var cartItems = new Dictionary<string, object>
             {
                 { "Mechanical Keyboard", 89.99m },
@@ -60,52 +58,52 @@ namespace RetailECommerce.Controllers
                 cartItems
             );
 
-            if (checkoutResult.IsSuccessful)
+            string paymentStatus;
+            string notificationMessage;
+
+            if (paymentType?.ToLower() == "cod")
             {
-                string notificationMessage =
+                paymentStatus = "Pending";
+                notificationMessage =
+                    $"Payment pending. Order #{orderId} has been placed, but payment will be collected during delivery.";
+            }
+            else if (checkoutResult.IsSuccessful)
+            {
+                paymentStatus = "Successful";
+                notificationMessage =
                     $"Payment successful. Your order #{orderId} has been placed. Transaction ID: {checkoutResult.GetTransactionId()}";
-
-                var notification = new Notification
-                {
-                    UserId = userId,
-                    Message = notificationMessage,
-                    Type = NotificationType.PaymentUpdate,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _context.Notifications.Add(notification);
-                _context.SaveChanges();
-
-                ViewBag.Message = checkoutResult.GetDisplayMessage();
-                ViewBag.TransactionId = checkoutResult.GetTransactionId();
-                ViewBag.OrderStatus = checkoutResult.GetOrderStatus();
-                ViewBag.PaymentType = paymentType;
-                ViewBag.Total = checkoutResult.TotalAmount;
-
-                ViewBag.PaymentNotification = notificationMessage;
-
-                return View("Process");
             }
             else
             {
-                string failedMessage = $"Payment failed. Reason: {checkoutResult.Message}";
-
-                var notification = new Notification
-                {
-                    UserId = userId,
-                    Message = failedMessage,
-                    Type = NotificationType.PaymentUpdate,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _context.Notifications.Add(notification);
-                _context.SaveChanges();
-
-                ModelState.AddModelError("", checkoutResult.Message);
-                ViewBag.Message = failedMessage;
-
-                return View("Index");
+                paymentStatus = "Failed";
+                notificationMessage =
+                    $"Payment failed. Order #{orderId} was not placed. Reason: {checkoutResult.Message}";
             }
+
+            var notification = new Notification
+            {
+                UserId = userId,
+                Message = notificationMessage,
+                Type = NotificationType.PaymentUpdate,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Notifications.Add(notification);
+            _context.SaveChanges();
+
+            ViewBag.PaymentStatus = paymentStatus;
+            ViewBag.IsPaymentSuccessful = paymentStatus == "Successful";
+            ViewBag.IsPaymentPending = paymentStatus == "Pending";
+            ViewBag.IsPaymentFailed = paymentStatus == "Failed";
+
+            ViewBag.Message = checkoutResult.GetDisplayMessage();
+            ViewBag.TransactionId = checkoutResult.GetTransactionId();
+            ViewBag.OrderStatus = paymentStatus;
+            ViewBag.PaymentType = paymentType;
+            ViewBag.Total = checkoutResult.TotalAmount;
+            ViewBag.PaymentNotification = notificationMessage;
+
+            return View("Process");
         }
     }
 }
