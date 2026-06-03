@@ -23,6 +23,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
 builder.Services.AddScoped<ReportContext>();
+builder.Services.AddScoped<RetailECommerce.Services.Facades.AdminDashboardFacade>();
 
 
 builder.Services.AddControllersWithViews();
@@ -84,6 +85,7 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedPaymentAsync(context);
         await DataSeeder.SeedEnquiryAsync(context);
         await DataSeeder.SeedReviewAsync(context);
+        await DataSeeder.SeedOrderAsync(context);
         
         
     }

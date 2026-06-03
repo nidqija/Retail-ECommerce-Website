@@ -9,15 +9,20 @@ public class AdminController : Controller
 {
     private readonly MyDbContext _context;
     private readonly IProductRepository _productRepository;
+    private readonly RetailECommerce.Services.Facades.AdminDashboardFacade _dashboardFacade;
 
-    public AdminController(MyDbContext context, IProductRepository productRepository)
+    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade)
     {
         _context = context;
         _productRepository = productRepository;
+        _dashboardFacade = dashboardFacade;
     }
     // GET: /Admin  — Admin hub / overview
     public IActionResult Index()
     {
+        var summary = _dashboardFacade.GetDashboardSummary();
+        ViewBag.DashboardSummary = summary;
+        
         PageCreator pageCreator = new AdminHomePageCreator();
         return pageCreator.RenderPage(this);
     }
@@ -89,7 +94,7 @@ public class AdminController : Controller
     // GET: /Admin/Orders
     public IActionResult Orders()
     {
-        var orders = _context.Payments.Include(p => p.User).ToList();
+        var orders = _context.Orders.Include(p => p.User).ToList();
         ViewBag.Orders = orders;
         PageCreator pageCreator = new AdminOrdersPageCreator();
         return pageCreator.RenderPage(this);
@@ -98,7 +103,7 @@ public class AdminController : Controller
     // GET: /Admin/OrderDetails/{id}
     public IActionResult OrderDetails(int id)
     {
-        var order = _context.Payments.Include(p => p.User).FirstOrDefault(o => o.Id == id);
+        var order = _context.Orders.Include(p => p.User).Include(o => o.OrderItems).ThenInclude(oi => oi.Product).FirstOrDefault(o => o.Id == id);
         if (order == null) return NotFound();
 
         ViewBag.Order = order;
@@ -108,12 +113,12 @@ public class AdminController : Controller
 
     // POST: /Admin/UpdateOrderStatus
     [HttpPost]
-    public IActionResult UpdateOrderStatus(int id, PaymentStatus status)
+    public IActionResult UpdateOrderStatus(int id, string status)
     {
-        var order = _context.Payments.Find(id);
+        var order = _context.Orders.Find(id);
         if (order != null)
         {
-            order.PaymentStatus = status;
+            order.OrderStatus = status;
             _context.SaveChanges();
         }
         return RedirectToAction("OrderDetails", new { id });

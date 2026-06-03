@@ -1,6 +1,6 @@
 @{
     ViewData["Title"] = "Order Details";
-    var o = ViewBag.Order as RetailECommerce.Models.Payment;
+    var o = ViewBag.Order as RetailECommerce.Models.Order;
 }
 
 <div class="mb-4">
@@ -26,35 +26,34 @@ else
                         <dd class="col-sm-8">#@o.Id</dd>
 
                         <dt class="col-sm-4">Date</dt>
-                        <dd class="col-sm-8">@o.PaymentDate.ToString("MMMM d, yyyy — HH:mm")</dd>
+                        <dd class="col-sm-8">@o.OrderDate.ToString("MMMM d, yyyy — HH:mm")</dd>
 
-                        <dt class="col-sm-4">Payment Method</dt>
-                        <dd class="col-sm-8">@o.PaymentMethod</dd>
+                        <dt class="col-sm-4">Customer</dt>
+                        <dd class="col-sm-8">@o.User?.FullName</dd>
 
                         <dt class="col-sm-4">Amount</dt>
-                        <dd class="col-sm-8 fw-bold text-primary fs-5">$@o.Total_Amount.ToString("0.00")</dd>
+                        <dd class="col-sm-8 fw-bold text-primary fs-5">$@o.TotalAmount.ToString("0.00")</dd>
 
                         <dt class="col-sm-4">Status</dt>
                         <dd class="col-sm-8">
                             @{
-                                var badgeClass = o.PaymentStatus switch
+                                var badgeClass = o.OrderStatus switch
                                 {
-                                    RetailECommerce.Models.PaymentStatus.Completed => "bg-success",
-                                    RetailECommerce.Models.PaymentStatus.Pending   => "bg-warning text-dark",
-                                    RetailECommerce.Models.PaymentStatus.Failed    => "bg-danger",
-                                    RetailECommerce.Models.PaymentStatus.Refunded  => "bg-info text-dark",
-                                    _                                               => "bg-secondary"
+                                    "Completed" => "bg-success",
+                                    "Pending"   => "bg-warning text-dark",
+                                    "Cancelled" => "bg-danger",
+                                    _           => "bg-secondary"
                                 };
                             }
-                            <span class="badge @badgeClass fs-6">@o.PaymentStatus</span>
+                            <span class="badge @badgeClass fs-6">@o.OrderStatus</span>
                         </dd>
                     </dl>
                 </div>
             </div>
 
-            <!-- Mock line items -->
+            <!-- Line items -->
             <div class="card shadow-sm">
-                <div class="card-header fw-bold">🛒 Items Purchased (Mock)</div>
+                <div class="card-header fw-bold">🛒 Items Purchased</div>
                 <div class="card-body p-0">
                     <table class="table mb-0">
                         <thead class="table-light">
@@ -65,21 +64,28 @@ else
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Mechanical Keyboard</td>
-                                <td class="text-center">1</td>
-                                <td class="text-end">$89.99</td>
-                            </tr>
-                            <tr>
-                                <td>27" IPS Monitor</td>
-                                <td class="text-center">1</td>
-                                <td class="text-end">$329.99</td>
-                            </tr>
+                            @if(o.OrderItems != null && o.OrderItems.Any())
+                            {
+                                @foreach(var item in o.OrderItems)
+                                {
+                                    <tr>
+                                        <td>@(item.Product?.Name ?? "Unknown Product")</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">$@item.UnitPrice.ToString("0.00")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center">No items found for this order.</td>
+                                </tr>
+                            }
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
                                 <td colspan="2" class="text-end fw-bold">Total</td>
-                                <td class="text-end fw-bold text-primary">$@o.Total_Amount.ToString("0.00")</td>
+                                <td class="text-end fw-bold text-primary">$@o.TotalAmount.ToString("0.00")</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -101,9 +107,9 @@ else
                         <div class="mb-3">
                             <label class="form-label fw-semibold">New Status</label>
                             <select name="status" class="form-select">
-                                @foreach (var status in Enum.GetValues<RetailECommerce.Models.PaymentStatus>())
+                                @foreach (var status in new[] { "Pending", "Processing", "Shipped", "Completed", "Cancelled" })
                                 {
-                                    <option value="@status" selected="@(status == o.PaymentStatus)">
+                                    <option value="@status" selected="@(status == o.OrderStatus ? "selected" : null)">
                                         @status
                                     </option>
                                 }

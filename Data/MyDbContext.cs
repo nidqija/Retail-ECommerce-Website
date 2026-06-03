@@ -47,4 +47,8 @@ public class MyDbContext : DbContext
 
     public DbSet<Review> Reviews { get; set; }
 
+    public DbSet<Order> Orders { get; set; }
+
+    public DbSet<OrderItem> OrderItems { get; set; }
+
 }
