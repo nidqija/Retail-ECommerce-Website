@@ -1,0 +1,195 @@
+@{
+    ViewData["Title"] = "Discount Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-muted mb-0 text-uppercase small fw-bold">Admin Panel</p>
+        <h1 class="mb-0">Discount Management</h1>
+    </div>
+    <div>
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-light h-100 shadow-sm">
+            <div class="card-body">
+                <p class="text-muted small text-uppercase fw-bold mb-1">Total Discounts</p>
+                <p class="h3 fw-bold mb-0">12</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success h-100 shadow-sm">
+            <div class="card-body">
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Active</p>
+                <p class="h3 fw-bold mb-0">8</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-dark bg-warning h-100 shadow-sm">
+            <div class="card-body">
+                <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Expired / Inactive</p>
+                <p class="h3 fw-bold mb-0">4</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" id="discountTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" type="button">All</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" type="button">Active</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" type="button">Expired / Inactive</button>
+    </li>
+</ul>
+
+<div class="card shadow-sm">
+    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+        <span>🏷️ Promo Codes & Campaigns (Hardcoded for now)</span>
+        <a asp-controller="Discount" asp-action="Create" class="btn btn-sm btn-primary py-1">
+            + Create New Discount
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">Code</th>
+                        <th style="width: 20%;">Campaign Name</th>
+                        <th style="width: 15%;">Discount Value</th>
+                        <th style="width: 15%;">Start Date</th>
+                        <th style="width: 15%;">End Date</th>
+                        <th style="width: 10%;" class="text-center">Status</th>
+                        <th style="width: 10%;" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="font-monospace fw-bold text-uppercase">SUMMER25</span>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                Summer Clearance Sale
+                            </span>
+                        </td>
+                        <td>
+                            <span>25% Off</span>
+                        </td>
+                        <td>01/06/2026</td>
+                        <td>31/08/2026</td>
+                        <td class="text-center">
+                            <span class="badge bg-success">Active</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="1" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                    Edit
+                                </a>
+                                <form method="post" asp-controller="Discount" asp-action="Deactivate" asp-route-id="1">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2">
+                                        Deactivate
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span class="font-monospace fw-bold text-uppercase">WELCOME10</span>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                New User Sign-up Bonus
+                            </span>
+                        </td>
+                        <td>
+                            <span>$10 Off</span>
+                        </td>
+                        <td>01/01/2026</td>
+                        <td>31/12/2026</td>
+                        <td class="text-center">
+                            <span class="badge bg-success">Active</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="2" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                    Edit
+                                </a>
+                                <form method="post" asp-controller="Discount" asp-action="Deactivate" asp-route-id="2">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2">
+                                        Deactivate
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span class="font-monospace fw-bold text-uppercase">WINTER50</span>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                Winter Liquidation
+                            </span>
+                        </td>
+                        <td>
+                            <span>50% Off</span>
+                        </td>
+                        <td>15/11/2025</td>
+                        <td>15/02/2026</td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary">Expired</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="3" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                    Edit
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span class="font-monospace fw-bold text-uppercase">FLASHDEAL</span>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                Midnight Flash Sale
+                            </span>
+                        </td>
+                        <td>
+                            <span>15% Off</span>
+                        </td>
+                        <td>04/06/2026</td>
+                        <td>05/06/2026</td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark">Inactive</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="4" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                    Edit
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
