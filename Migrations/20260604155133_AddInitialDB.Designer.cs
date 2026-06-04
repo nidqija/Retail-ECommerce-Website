@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace RetailECommerce.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20260602195856_AddCreatedAtforReview")]
-    partial class AddCreatedAtforReview
+    [Migration("20260604155133_AddInitialDB")]
+    partial class AddInitialDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,6 +83,64 @@ namespace RetailECommerce.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("RetailECommerce.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("RetailECommerce.Models.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("RetailECommerce.Models.Payment", b =>
@@ -167,17 +225,17 @@ namespace RetailECommerce.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("VendorReply")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("rating")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("status")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
@@ -248,6 +306,42 @@ namespace RetailECommerce.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("RetailECommerce.Models.Order", b =>
+                {
+                    b.HasOne("RetailECommerce.Models.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
+                    b.HasOne("RetailECommerce.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RetailECommerce.Models.OrderItem", b =>
+                {
+                    b.HasOne("RetailECommerce.Models.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RetailECommerce.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("RetailECommerce.Models.Payment", b =>
                 {
                     b.HasOne("RetailECommerce.Models.User", "User")
@@ -262,7 +356,7 @@ namespace RetailECommerce.Migrations
             modelBuilder.Entity("RetailECommerce.Models.Review", b =>
                 {
                     b.HasOne("RetailECommerce.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -278,9 +372,16 @@ namespace RetailECommerce.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("RetailECommerce.Models.Order", b =>
+                {
+                    b.Navigation("OrderItems");
+                });
+
             modelBuilder.Entity("RetailECommerce.Models.Product", b =>
                 {
                     b.Navigation("Enquiries");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("RetailECommerce.Models.User", b =>

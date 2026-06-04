@@ -35,6 +35,8 @@ public class Product
     // same as foreign key declaration in Enquiry model
     public ICollection<Enquiry> Enquiries { get; set; } = new List<Enquiry>();
 
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
 
     
 }

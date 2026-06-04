@@ -1,17 +1,43 @@
 @{
     ViewData["Title"] = "Order Confirmation";
+    bool isPaymentSuccessful = ViewBag.IsPaymentSuccessful == true;
+    bool isPaymentPending = ViewBag.IsPaymentPending == true;
+    bool isPaymentFailed = ViewBag.IsPaymentFailed == true;
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <!-- Success Banner -->
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <div class="text-center">
-                    <h3 class="mb-2">✓ Order Placed Successfully!</h3>
-                    <p>@ViewBag.Message</p>
+            
+
+            
+            @if (isPaymentPending)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <div class="text-center">
+                        <h3 class="mb-2">⏳ Payment Pending</h3>
+                        <p>@ViewBag.PaymentNotification</p>
+                    </div>
                 </div>
-            </div>
+            }
+            else if (isPaymentSuccessful)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="text-center">
+                        <h3 class="mb-2">✓ Order Placed Successfully!</h3>
+                        <p>@ViewBag.PaymentNotification</p>
+                    </div>
+                </div>
+            }
+            else if (isPaymentFailed)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="text-center">
+                        <h3 class="mb-2">✕ Payment Failed</h3>
+                        <p>@ViewBag.PaymentNotification</p>
+                    </div>
+                </div>
+            }
 
             <!-- Order Details Card -->
             <div class="card mb-4 shadow-sm">

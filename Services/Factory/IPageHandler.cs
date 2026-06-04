@@ -182,3 +182,12 @@ public class ReviewsPageHandler : IPageHandler
         return controller.View("~/Views/Admin/Review.cshtml");
     }
 }
+
+
+public class DiscountsPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Admin/Discounts.cshtml");
+    }
+}

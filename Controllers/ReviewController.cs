@@ -50,7 +50,7 @@ public class ReviewController : Controller
 
 
             existingReview.VendorReply = review.VendorReply;
-            existingReview.status = "Replied";
+            existingReview.Status = "Replied";
 
             _reviewRepository.UpdateReview(existingReview);
             return RedirectToAction("Index");

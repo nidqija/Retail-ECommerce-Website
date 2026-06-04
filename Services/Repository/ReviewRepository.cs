@@ -60,9 +60,9 @@ public class ReviewRepository : IReviewRepository
             throw new Exception("Review not found");
         }
 
-        existingReview.rating = review.rating;
+        existingReview.Rating = review.Rating;
         existingReview.Comment = review.Comment;
-        existingReview.status = review.status;
+        existingReview.Status = review.Status;
         existingReview.VendorReply = review.VendorReply;
         existingReview.UserId = review.UserId;
         existingReview.ProductId = review.ProductId;
@@ -80,7 +80,7 @@ public class ReviewRepository : IReviewRepository
         }
 
         review.VendorReply = null;
-        review.status = "Pending"; 
+        review.Status = "Pending"; 
         _context.SaveChanges();
 
 

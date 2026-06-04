@@ -168,3 +168,11 @@ public class ReviewsPageCreator : PageCreator
         return new ReviewsPageHandler();
     }
 }
+
+public class DiscountsPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new DiscountsPageHandler();
+    }
+}
