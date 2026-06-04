@@ -60,4 +60,5 @@ public class MyDbContext : DbContext
 
     public DbSet<OrderItem> OrderItems { get; set; }
 
+    public DbSet<Discount> Discounts { get; set; }
 }
