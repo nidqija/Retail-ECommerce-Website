@@ -108,9 +108,9 @@ public class DataSeeder
         {
             var reviews = new List<Review>
             {
-                new Review { UserId = 1, ProductId = 1, rating = 5, Comment = "Great product!", VendorReply = "", CreatedAt = DateTime.UtcNow },
-                new Review { UserId = 1, ProductId = 2, rating = 4, Comment = "Good quality.", VendorReply = "", CreatedAt = DateTime.UtcNow },
-                new Review { UserId = 1, ProductId = 3, rating = 3, Comment = "Average product.", VendorReply = "", CreatedAt = DateTime.UtcNow }
+                new Review { UserId = 1, ProductId = 1, Rating = 5, Comment = "Great product!", VendorReply = "", CreatedAt = DateTime.UtcNow },
+                new Review { UserId = 1, ProductId = 2, Rating = 4, Comment = "Good quality.", VendorReply = "", CreatedAt = DateTime.UtcNow },
+                new Review { UserId = 1, ProductId = 3, Rating = 3, Comment = "Average product.", VendorReply = "", CreatedAt = DateTime.UtcNow }
             };
 
             context.Reviews.AddRange(reviews);

@@ -18,6 +18,8 @@ public class EnquiryController : Controller
     }
 
 
+
+
     public IActionResult Index()
     {
         var enquiries = _enquiryRepository.GetAllEnquiries();
@@ -25,6 +27,33 @@ public class EnquiryController : Controller
         PageCreator pageCreator = new EnquiriesPageCreator();
         return pageCreator.RenderPage(this);
      }
+
+
+     [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SubmitEnquiry(int ProductId, string Message)
+    {
+        if (string.IsNullOrWhiteSpace(Message))
+        {
+            TempData["EnquiryError"] = "Please enter your question.";
+            return RedirectToAction("Details", "Products", new { id = ProductId, tab = "questions" });
+        }
+
+        var enquiry = new Enquiry
+        {
+            ProductId = ProductId,
+            UserId = 1,
+            Message = Message,
+            ReplyMessage = "",
+            Status = "Pending",
+            CreatedAt = DateTime.Now
+        };
+
+        _enquiryRepository.AddEnquiry(enquiry);
+
+        TempData["EnquiryMessage"] = "Question submitted!";
+        return RedirectToAction("Details", "Products", new { id = ProductId, tab = "questions" });
+    }
 
 
 

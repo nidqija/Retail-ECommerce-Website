@@ -86,6 +86,7 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedEnquiryAsync(context);
         await DataSeeder.SeedReviewAsync(context);
         await DataSeeder.SeedOrderAsync(context);
+    
         
         
     }

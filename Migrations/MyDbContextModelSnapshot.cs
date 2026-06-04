@@ -222,17 +222,17 @@ namespace RetailECommerce.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("VendorReply")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("rating")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("status")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
@@ -353,7 +353,7 @@ namespace RetailECommerce.Migrations
             modelBuilder.Entity("RetailECommerce.Models.Review", b =>
                 {
                     b.HasOne("RetailECommerce.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -377,6 +377,8 @@ namespace RetailECommerce.Migrations
             modelBuilder.Entity("RetailECommerce.Models.Product", b =>
                 {
                     b.Navigation("Enquiries");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("RetailECommerce.Models.User", b =>

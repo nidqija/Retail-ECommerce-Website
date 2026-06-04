@@ -2,6 +2,8 @@ namespace RetailECommerce.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
+using RetailECommerce.Data;
+using RetailECommerce.ViewModels;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 
@@ -12,16 +14,21 @@ public class ProductsController : Controller
     private IProductRepository _productRepository;
     private IEnquiryRepository _enquiryRepository;
 
-    private IReviewRepository _reviewRepository;
+private readonly MyDbContext _context;
+private readonly IReviewRepository _reviewRepository;
 
+public ProductsController(
+    IProductRepository productRepository,
+    IEnquiryRepository enquiryRepository,
+    IReviewRepository reviewRepository,
+    MyDbContext context)
+{
+    _productRepository = productRepository;
+    _enquiryRepository = enquiryRepository;
+    _reviewRepository = reviewRepository;
+    _context = context;
+}
 
-
-    public ProductsController(IProductRepository productRepository , IEnquiryRepository enquiryRepository  , IReviewRepository reviewRepository)
-    {
-        _productRepository = productRepository;
-        _enquiryRepository = enquiryRepository;
-        _reviewRepository = reviewRepository;
-    }
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
     {
@@ -99,16 +106,46 @@ public class ProductsController : Controller
         var enquriesbyId = _enquiryRepository.GetAllEnquiries().Where(e => e.ProductId == id).ToList();
         ViewBag.Enquiries = enquriesbyId;
 
-        var reviewsbyId = _reviewRepository.GetAllReviews().Where(r => r.ProductId == id).ToList();
-        ViewBag.Reviews = reviewsbyId;
+        var reviewsById = _reviewRepository.GetAllReviews()
+            .Where(r => r.ProductId == id)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
 
-
-
+        ViewBag.Reviews = reviewsById;
 
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
     }
 
+    
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public IActionResult SubmitReview(SubmitReviewViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["ReviewError"] = "Please select a rating and keep your comment within 500 characters.";
+            return RedirectToAction("Details", new { id = model.ProductId });
+        }
+
+        int userId = 1;
+
+        var review = new Review
+        {
+            ProductId = model.ProductId,
+            UserId = userId,
+            Rating = model.Rating,
+            Comment = model.Comment ?? string.Empty,
+            CreatedAt = DateTime.Now
+        };
+
+        _context.Reviews.Add(review);
+        _context.SaveChanges();
+
+        TempData["ReviewMessage"] = "Your feedback and review has been submitted.";
+        return RedirectToAction("Details", new { id = model.ProductId });
+    }
 
     
 }
