@@ -188,6 +188,6 @@ public class DiscountsPageHandler : IPageHandler
 {
     public IActionResult Render(Controller controller)
     {
-        return controller.View("~/Views/Admin/Discounts.cshtml");
+        return controller.View("~/Views/Admin/Discount.cshtml");
     }
 }

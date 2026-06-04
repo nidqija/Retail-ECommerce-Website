@@ -19,6 +19,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IEnquiryRepository, EnquiryRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
@@ -86,6 +87,7 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedEnquiryAsync(context);
         await DataSeeder.SeedReviewAsync(context);
         await DataSeeder.SeedOrderAsync(context);
+        await DataSeeder.SeedDiscountAsync(context);
     
         
         

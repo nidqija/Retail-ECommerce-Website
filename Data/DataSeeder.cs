@@ -162,4 +162,51 @@ public class DataSeeder
             Console.WriteLine("Orders already exist in the database. Skipping seeding.");
         }
     }
+
+
+    public static async Task SeedDiscountAsync(MyDbContext context)
+    {
+        await context.Database.MigrateAsync();
+
+        if (!context.Discounts.Any())
+        {
+            var discounts = new List<Discount>
+            {
+               new Discount 
+               { 
+                   DiscountName = "Summer Sale", 
+                   Description = "Get 25% off on all summer clothing!", 
+                   DiscountCode = "SUMMER25", 
+                   DiscountPercentage = 25, 
+                   StartDate = DateTime.Now.AddDays(-10), 
+                   EndDate = DateTime.Now.AddDays(20) 
+               },
+               new Discount 
+               { 
+                   DiscountName = "Winter Sale", 
+                   Description = "Enjoy 30% off on winter wear!", 
+                   DiscountCode = "WINTER30", 
+                   DiscountPercentage = 30, 
+                   StartDate = DateTime.Now.AddDays(-20), 
+                   EndDate = DateTime.Now.AddDays(-5) 
+               },
+               new Discount 
+               { 
+                   DiscountName = "Black Friday", 
+                   Description = "Massive 50% off on all products!", 
+                   DiscountCode = "BLACKFRIDAY50", 
+                   DiscountPercentage = 50, 
+                   StartDate = DateTime.Now.AddDays(10), 
+                   EndDate = DateTime.Now.AddDays(15) 
+               }
+            };
+
+            context.Discounts.AddRange(discounts);
+            await context.SaveChangesAsync();
+        } 
+        else
+        {
+            Console.WriteLine("Discounts already exist in the database. Skipping seeding.");
+        }
+    }
 }

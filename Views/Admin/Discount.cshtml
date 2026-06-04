@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Discount Management";
+    var discounts = ViewBag.Discounts as List<RetailECommerce.Models.Discount> ?? new List<RetailECommerce.Models.Discount>();
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -19,7 +20,15 @@
         <div class="card bg-light h-100 shadow-sm">
             <div class="card-body">
                 <p class="text-muted small text-uppercase fw-bold mb-1">Total Discounts</p>
-                <p class="h3 fw-bold mb-0">12</p>
+
+                @if (discounts == null)
+                {
+                    <p class="h3 fw-bold mb-0">0</p>
+                }
+                else
+                {
+                    <p class="h3 fw-bold mb-0">@discounts.Count</p>
+                }
             </div>
         </div>
     </div>
@@ -27,7 +36,15 @@
         <div class="card text-white bg-success h-100 shadow-sm">
             <div class="card-body">
                 <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Active</p>
-                <p class="h3 fw-bold mb-0">8</p>
+                @if (discounts == null)
+                {
+                    <p class="h3 fw-bold mb-0">0</p>
+                }
+                else
+                {
+                    
+                <p class="h3 fw-bold mb-0">@discounts.Count(d => d.EndDate > DateTime.Now)</p>
+                }
             </div>
         </div>
     </div>
@@ -35,7 +52,15 @@
         <div class="card text-dark bg-warning h-100 shadow-sm">
             <div class="card-body">
                 <p class="card-title small text-uppercase fw-bold mb-1 opacity-75">Expired / Inactive</p>
-                <p class="h3 fw-bold mb-0">4</p>
+                @if (discounts == null)
+                {
+                    <p class="h3 fw-bold mb-0">0</p>
+                }
+                else
+                {
+                <p class="h3 fw-bold mb-0">@discounts.Count(d => d.EndDate <= DateTime.Now)</p>
+
+                }
             </div>
         </div>
     </div>
@@ -55,10 +80,71 @@
 
 <div class="card shadow-sm">
     <div class="card-header fw-bold d-flex justify-content-between align-items-center">
-        <span>🏷️ Promo Codes & Campaigns (Hardcoded for now)</span>
-        <a asp-controller="Discount" asp-action="Create" class="btn btn-sm btn-primary py-1">
+        <span>🏷️ Promo Codes & Campaigns</span>
+        <button type="button" class="btn btn-sm btn-primary py-1" data-bs-toggle="modal" data-bs-target="#createDiscountModal">
             + Create New Discount
-        </a>
+        </button>
+
+        <div class="modal fade" id="createDiscountModal" tabindex="-1" aria-labelledby="createDiscountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="createDiscountModalLabel">🏷️ Add New Discount Campaign</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" asp-controller="Discount" asp-action="AddDiscount" class="needs-validation" novalidate>
+                <input type="hidden" name="Id" value="0" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-1">Promo Code</label>
+                            <input type="text" name="DiscountCode" class="form-control font-monospace text-uppercase" placeholder="e.g. SUMMER25" required />
+                            <div class="invalid-feedback">Please enter a valid unique promo code.</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-1">Campaign Name</label>
+                            <input type="text" name="DiscountName" class="form-control" placeholder="e.g. Summer Clearance" required />
+                            <div class="invalid-feedback">A campaign name is required.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-1">Discount Percentage (%)</label>
+                            <div class="input-group has-validation">
+                                <input type="number" name="DiscountPercentage" class="form-control" min="1" max="100" placeholder="25" required />
+                                <span class="input-group-text">% Off</span>
+                                <div class="invalid-feedback">Please provide a percentage value between 1 and 100.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-1">Campaign Description</label>
+                            <textarea name="Description" class="form-control" rows="2" placeholder="Brief details about this discount offer..." required></textarea>
+                            <div class="invalid-feedback">Please add a short description for context.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-1">Start Date</label>
+                            <input type="date" name="StartDate" id="StartDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            <div class="invalid-feedback">Valid start date is required.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-1">End Date</label>
+                            <input type="date" name="EndDate" id="EndDate" class="form-control" value="@DateTime.Now.AddDays(7).ToString("yyyy-MM-dd")" required />
+                            <div class="invalid-feedback">Valid end date is required.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Save Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -67,6 +153,7 @@
                     <tr>
                         <th style="width: 15%;">Code</th>
                         <th style="width: 20%;">Campaign Name</th>
+                        <th style="width: 15%;">Discount Description</th>
                         <th style="width: 15%;">Discount Value</th>
                         <th style="width: 15%;">Start Date</th>
                         <th style="width: 15%;">End Date</th>
@@ -75,121 +162,199 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    @if(discounts != null && discounts.Count >0 ) {
+                       @foreach(var discount in discounts){
+
+                       
+                         <tr>
                         <td>
-                            <span class="font-monospace fw-bold text-uppercase">SUMMER25</span>
+                            <span class="font-monospace fw-bold text-uppercase">@discount.DiscountCode</span>
                         </td>
                         <td>
                             <span class="text-truncate d-inline-block" style="max-width: 200px;">
-                                Summer Clearance Sale
+                                @discount.DiscountName
                             </span>
                         </td>
                         <td>
-                            <span>25% Off</span>
+                            <span class="font-monospace fw-bold text-uppercase">@discount.Description</span>
                         </td>
-                        <td>01/06/2026</td>
-                        <td>31/08/2026</td>
+                        <td>
+                            <span>@discount.DiscountPercentage%</span>
+                        </td>
+                        <td>@discount.StartDate.ToString("dd/MM/yyyy")</td>
+                        <td>@discount.EndDate.ToString("dd/MM/yyyy")</td>
                         <td class="text-center">
-                            <span class="badge bg-success">Active</span>
+                            @if (discount.EndDate > DateTime.Now)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
                         </td>
                         <td class="text-center">
+                            
                             <div class="d-flex justify-content-center gap-1">
-                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="1" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary py-0 px-2 edit-discount-btn"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editDiscountModal"
+                                        data-id="@discount.Id"
+                                        data-code="@discount.DiscountCode"
+                                        data-name="@discount.DiscountName"
+                                        data-percentage="@discount.DiscountPercentage"
+                                        data-description="@discount.Description"
+                                        data-start="@discount.StartDate.ToString("yyyy-MM-dd")"
+                                        data-end="@discount.EndDate.ToString("yyyy-MM-dd")">
                                     Edit
-                                </a>
-                                <form method="post" asp-controller="Discount" asp-action="Deactivate" asp-route-id="1">
+                                </button>
+                                
+                                @if (discount.EndDate > DateTime.Now)
+                                {
+                                <form method="POST" asp-controller="Discount" asp-action="DeactivateDiscount" asp-route-id="@discount.Id">
                                     <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2">
                                         Deactivate
                                     </button>
                                 </form>
+                                }
+                                else
+                                {
+                                    <form method="POST" asp-controller="Discount" asp-action="ActivateDiscount" asp-route-id="@discount.Id">
+                                        <button type="submit" class="btn btn-sm btn-outline-success py-0 px-2">
+                                            Activate
+                                        </button>
+                                    </form>
+                                }
                             </div>
                         </td>
                     </tr>
+                       }
 
-                    <tr>
-                        <td>
-                            <span class="font-monospace fw-bold text-uppercase">WELCOME10</span>
-                        </td>
-                        <td>
-                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
-                                New User Sign-up Bonus
-                            </span>
-                        </td>
-                        <td>
-                            <span>$10 Off</span>
-                        </td>
-                        <td>01/01/2026</td>
-                        <td>31/12/2026</td>
-                        <td class="text-center">
-                            <span class="badge bg-success">Active</span>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-1">
-                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="2" class="btn btn-sm btn-outline-primary py-0 px-2">
-                                    Edit
-                                </a>
-                                <form method="post" asp-controller="Discount" asp-action="Deactivate" asp-route-id="2">
-                                    <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2">
-                                        Deactivate
-                                    </button>
+                       <div class="modal fade" id="editDiscountModal" tabindex="-1" aria-labelledby="editDiscountModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content shadow">
+                                <div class="modal-header bg-light">
+                                    <h5 class="modal-title fw-bold" id="editDiscountModalLabel">📝 Edit Discount Campaign</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form method="POST" asp-controller="Discount" asp-action="UpdateDiscount" class="needs-validation" novalidate>
+                                    <input type="hidden" name="Id" id="EditDiscountId" value="" />
+                                    
+                                    <div class="modal-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">Promo Code</label>
+                                                <input type="text" name="DiscountCode" id="EditDiscountCode" class="form-control font-monospace text-uppercase" required />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">Campaign Name</label>
+                                                <input type="text" name="DiscountName" id="EditDiscountName" class="form-control" required />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">Discount Percentage (%)</label>
+                                                <input type="number" name="DiscountPercentage" id="EditDiscountPercentage" class="form-control" min="1" max="100" required />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">Campaign Description</label>
+                                                <textarea name="Description" id="EditDescription" class="form-control" rows="2" required></textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">Start Date</label>
+                                                <input type="date" name="StartDate" id="EditStartDate" class="form-control" required />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">End Date</label>
+                                                <input type="date" name="EndDate" id="EditEndDate" class="form-control" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light border-top-0">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary px-4">Update Changes</button>
+                                    </div>
                                 </form>
-                            </div>
-                        </td>
-                    </tr>
 
-                    <tr>
-                        <td>
-                            <span class="font-monospace fw-bold text-uppercase">WINTER50</span>
-                        </td>
-                        <td>
-                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
-                                Winter Liquidation
-                            </span>
-                        </td>
-                        <td>
-                            <span>50% Off</span>
-                        </td>
-                        <td>15/11/2025</td>
-                        <td>15/02/2026</td>
-                        <td class="text-center">
-                            <span class="badge bg-secondary">Expired</span>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-1">
-                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="3" class="btn btn-sm btn-outline-primary py-0 px-2">
-                                    Edit
-                                </a>
+                                <div class="px-3 pb-3 border-top bg-light text-end">
+                                    <form method="POST" asp-controller="Discount" asp-action="DeleteDiscount" onsubmit="return confirm('Are you sure you want to delete this discount campaign? This action cannot be undone.');" class="d-inline">
+                                        <input type="hidden" name="Id" id="DeleteDiscountId" value="" />
+                                        <button type="submit" class="btn btn-danger px-4">Delete</button>
+                                    </form>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
+                    }
 
-                    <tr>
-                        <td>
-                            <span class="font-monospace fw-bold text-uppercase">FLASHDEAL</span>
-                        </td>
-                        <td>
-                            <span class="text-truncate d-inline-block" style="max-width: 200px;">
-                                Midnight Flash Sale
-                            </span>
-                        </td>
-                        <td>
-                            <span>15% Off</span>
-                        </td>
-                        <td>04/06/2026</td>
-                        <td>05/06/2026</td>
-                        <td class="text-center">
-                            <span class="badge bg-warning text-dark">Inactive</span>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-1">
-                                <a asp-controller="Discount" asp-action="Edit" asp-route-id="4" class="btn btn-sm btn-outline-primary py-0 px-2">
-                                    Edit
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+                    
+
+                    
+                   
+
+                   
+
+                  
+
+                  
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+
+<script>
+    // Self-executing function to activate Bootstrap validation styling rules
+    (() => {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission on invalid conditions
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                const startDate = document.getElementById('StartDate');
+                const endDate = document.getElementById('EndDate');
+
+                // Custom validation check: Ensure End Date is after or equal to Start Date
+                if (startDate && endDate && new Date(endDate.value) < new Date(startDate.value)) {
+                    endDate.setCustomValidity('End date must be after the start date.');
+                } else if (endDate) {
+                    endDate.setCustomValidity(''); // Reset custom validation flag if okay
+                }
+
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+
+<script>
+    // Populate edit modal fields from the Edit button data-* attributes
+    document.addEventListener('DOMContentLoaded', function () {
+        const editButtons = document.querySelectorAll('.edit-discount-btn');
+        const setValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value ?? '';
+        };
+
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setValue('EditDiscountId', btn.dataset.id);
+                setValue('EditDiscountCode', btn.dataset.code);
+                setValue('EditDiscountName', btn.dataset.name);
+                setValue('EditDiscountPercentage', btn.dataset.percentage);
+                setValue('EditDescription', btn.dataset.description);
+                setValue('EditStartDate', btn.dataset.start);
+                setValue('EditEndDate', btn.dataset.end);
+                setValue('DeleteDiscountId', btn.dataset.id);
+            });
+        });
+    });
+</script>
