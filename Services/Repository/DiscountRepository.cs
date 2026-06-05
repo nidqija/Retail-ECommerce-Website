@@ -40,6 +40,7 @@ public class DiscountRepository : IDiscountRepository
         var existingDiscount = _context.Discounts.FirstOrDefault(d => d.Id == discount.Id);
         if (existingDiscount != null)
         {
+            existingDiscount.DiscountName = discount.DiscountName;
             existingDiscount.Description = discount.Description;
             existingDiscount.DiscountPercentage = discount.DiscountPercentage;
             existingDiscount.EndDate = discount.EndDate;

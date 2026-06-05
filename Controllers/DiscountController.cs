@@ -117,9 +117,28 @@ public class DiscountController : Controller
     }
 
 
+    [HttpPost]
+    public IActionResult UpdateDiscount(Discount discount)
+    {
+        var existingDiscount = _discountRepository.GetDiscountById(discount.Id);
 
 
+        if (existingDiscount == null)
+        {
+            return NotFound("Discount not found");
+        }
 
+        try
+        {
+            _discountRepository.UpdateDiscount(discount);
+            Console.WriteLine($"Discount with ID {discount.Id} updated successfully.");
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "An error occurred while updating the discount. , ex: " + ex.Message);
+        }
+    }
 
 
 }
