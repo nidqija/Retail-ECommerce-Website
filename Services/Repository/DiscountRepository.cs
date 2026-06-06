@@ -19,6 +19,30 @@ public class DiscountRepository : IDiscountRepository
         return _context.Discounts.ToList();
     }
 
+    public IEnumerable<Discount> GetActiveDiscounts()
+    {
+        var now = DateTime.Now;
+        // IsActive is a computed property (not mapped), so the date window is
+        // filtered in the query and IsActive is used as a final safety check.
+        return _context.Discounts
+            .Where(d => now >= d.StartDate && now <= d.EndDate)
+            .ToList()
+            .Where(d => d.IsActive)
+            .ToList();
+    }
+
+    public Discount? GetDiscountByCode(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return null;
+        }
+
+        var normalized = code.Trim().ToUpper();
+        return _context.Discounts
+            .FirstOrDefault(d => d.DiscountCode.ToUpper() == normalized);
+    }
+
     public Discount GetDiscountById(int id)
     {
         var discount = _context.Discounts.FirstOrDefault(d => d.Id == id);

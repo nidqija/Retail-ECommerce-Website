@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
+using RetailECommerce.Services.Discounts;
 using RetailECommerce.Services.Facades;
 using RetailECommerce.Services.Observers;
 
@@ -9,11 +10,13 @@ namespace RetailECommerce.Controllers
     {
         private readonly CheckoutFacade _checkoutFacade;
         private readonly MyDbContext _context;
+        private readonly IDiscountService _discountService;
 
-        public CheckoutController(MyDbContext context)
+        public CheckoutController(MyDbContext context, IDiscountService discountService)
         {
             _checkoutFacade = new CheckoutFacade();
             _context = context;
+            _discountService = discountService;
         }
 
         private void LoadCartData()
@@ -27,6 +30,9 @@ namespace RetailECommerce.Controllers
             ViewBag.Subtotal = 418.99m;
             ViewBag.Tax = Math.Round(418.99m * 0.08m, 2);
             ViewBag.Total = ViewBag.Subtotal + ViewBag.Tax;
+
+            // Discount codes the user can choose from on the order page.
+            ViewBag.AvailableDiscounts = _discountService.GetAvailableDiscounts().ToList();
         }
 
         public IActionResult Index()
@@ -36,14 +42,18 @@ namespace RetailECommerce.Controllers
         }
 
         [HttpPost]
-        public IActionResult Process(string paymentType, decimal subtotal)
+        public IActionResult Process(string paymentType, decimal subtotal, string? discountCode)
         {
             LoadCartData();
 
             int userId = 1;
             int orderId = new Random().Next(1000, 9999);
 
-           
+            // Apply the chosen discount to the subtotal (before tax). Expired or
+            // unknown codes are rejected and the full subtotal is charged.
+            var discountResult = _discountService.ApplyDiscount(discountCode, subtotal);
+            decimal payableSubtotal = discountResult.DiscountedSubtotal;
+
             var cartItems = new Dictionary<string, object>
             {
                 { "Mechanical Keyboard", 89.99m },
@@ -52,7 +62,7 @@ namespace RetailECommerce.Controllers
 
             var checkoutResult = _checkoutFacade.ProcessCheckout(
                 paymentType,
-                subtotal,
+                payableSubtotal,
                 orderId,
                 userId,
                 cartItems
@@ -100,8 +110,16 @@ namespace RetailECommerce.Controllers
             ViewBag.TransactionId = checkoutResult.GetTransactionId();
             ViewBag.OrderStatus = paymentStatus;
             ViewBag.PaymentType = paymentType;
-            ViewBag.Total = checkoutResult.TotalAmount;
             ViewBag.PaymentNotification = notificationMessage;
+
+            // Receipt figures, reflecting the discount cut-off.
+            ViewBag.Subtotal = discountResult.OriginalSubtotal;
+            ViewBag.DiscountApplied = discountResult.IsApplied;
+            ViewBag.DiscountAmount = discountResult.DiscountAmount;
+            ViewBag.DiscountMessage = discountResult.Message;
+            ViewBag.DiscountCode = discountResult.Discount?.DiscountCode;
+            ViewBag.Tax = Math.Round(payableSubtotal * 0.08m, 2);
+            ViewBag.Total = checkoutResult.TotalAmount;
 
             return View("Process");
         }
