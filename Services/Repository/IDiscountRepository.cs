@@ -23,4 +23,13 @@ public interface IDiscountRepository
     void DeactivateDiscount(int id);
 
     void ActivateDiscount(int id);
+
+    // The discount IDs a given user has already redeemed.
+    IEnumerable<int> GetUsedDiscountIds(int userId);
+
+    // True if the user has already redeemed this discount.
+    bool HasUserUsedDiscount(int userId, int discountId);
+
+    // Record that the user has redeemed this discount (no-op if already recorded).
+    void RecordDiscountUsed(int userId, int discountId);
 }

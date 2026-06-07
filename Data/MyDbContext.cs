@@ -38,6 +38,21 @@ public class MyDbContext : DbContext
             .WithMany(p => p.Reviews)
             .HasForeignKey(r => r.ProductId);
 
+        // Link a used-discount record to its user and discount.
+        modelBuilder.Entity<UsedDiscount>()
+            .HasOne(ud => ud.User)
+            .WithMany()
+            .HasForeignKey(ud => ud.UserId);
+
+        modelBuilder.Entity<UsedDiscount>()
+            .HasOne(ud => ud.Discount)
+            .WithMany()
+            .HasForeignKey(ud => ud.DiscountId);
+
+        // A user can only use each discount once.
+        modelBuilder.Entity<UsedDiscount>()
+            .HasIndex(ud => new { ud.UserId, ud.DiscountId })
+            .IsUnique();
     }
 
 
@@ -61,4 +76,6 @@ public class MyDbContext : DbContext
     public DbSet<OrderItem> OrderItems { get; set; }
 
     public DbSet<Discount> Discounts { get; set; }
+
+    public DbSet<UsedDiscount> UsedDiscounts { get; set; }
 }

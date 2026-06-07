@@ -6,6 +6,7 @@
     decimal tax      = ViewBag.Tax      ?? 0m;
     decimal total    = ViewBag.Total    ?? 0m;
     var availableDiscounts = (ViewBag.AvailableDiscounts as IEnumerable<Discount>) ?? Enumerable.Empty<Discount>();
+    var usedDiscountIds = (ViewBag.UsedDiscountIds as HashSet<int>) ?? new HashSet<int>();
 }
 
 <!-- QR Code Library -->
@@ -41,8 +42,9 @@
                         <option value="" data-pct="0">No discount</option>
                         @foreach (var d in availableDiscounts)
                         {
-                            <option value="@d.DiscountCode" data-pct="@d.DiscountPercentage">
-                                @d.DiscountCode — @d.DiscountName (@d.DiscountPercentage.ToString("0.##")% off)
+                            var alreadyUsed = usedDiscountIds.Contains(d.Id);
+                            <option value="@d.DiscountCode" data-pct="@d.DiscountPercentage" disabled="@(alreadyUsed ? "disabled" : null)">
+                                @d.DiscountCode — @d.DiscountName (@d.DiscountPercentage.ToString("0.##")% off)@(alreadyUsed ? " — already used" : "")
                             </option>
                         }
                     </select>

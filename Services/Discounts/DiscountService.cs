@@ -66,5 +66,33 @@ namespace RetailECommerce.Services.Discounts
                 Message = $"{discount.DiscountName} ({discount.DiscountPercentage:0.##}% off) applied."
             };
         }
+
+        public DiscountResult ApplyDiscount(string? code, decimal subtotal, int userId)
+        {
+            // Reject codes this user has already redeemed (one use per user).
+            if (!string.IsNullOrWhiteSpace(code))
+            {
+                var discount = _discountRepository.GetDiscountByCode(code);
+                if (discount != null && _discountRepository.HasUserUsedDiscount(userId, discount.Id))
+                {
+                    return DiscountResult.Rejected(
+                        subtotal,
+                        $"You have already used the discount \"{discount.DiscountCode}\".");
+                }
+            }
+
+            // Otherwise fall back to the normal validation/calculation.
+            return ApplyDiscount(code, subtotal);
+        }
+
+        public IEnumerable<int> GetUsedDiscountIds(int userId)
+        {
+            return _discountRepository.GetUsedDiscountIds(userId);
+        }
+
+        public void RecordDiscountUsed(int userId, int discountId)
+        {
+            _discountRepository.RecordDiscountUsed(userId, discountId);
+        }
     }
 }

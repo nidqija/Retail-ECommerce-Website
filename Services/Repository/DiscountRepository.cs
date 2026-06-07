@@ -100,8 +100,39 @@ public class DiscountRepository : IDiscountRepository
         var discount = _context.Discounts.FirstOrDefault(d => d.Id == id);
         if (discount != null)
         {
-            discount.EndDate = DateTime.Now.AddDays(30); 
+            discount.EndDate = DateTime.Now.AddDays(30);
             _context.SaveChanges();
         }
+    }
+
+    public IEnumerable<int> GetUsedDiscountIds(int userId)
+    {
+        return _context.UsedDiscounts
+            .Where(ud => ud.UserId == userId)
+            .Select(ud => ud.DiscountId)
+            .ToList();
+    }
+
+    public bool HasUserUsedDiscount(int userId, int discountId)
+    {
+        return _context.UsedDiscounts
+            .Any(ud => ud.UserId == userId && ud.DiscountId == discountId);
+    }
+
+    public void RecordDiscountUsed(int userId, int discountId)
+    {
+        // Don't double-record the same (user, discount) pair.
+        if (HasUserUsedDiscount(userId, discountId))
+        {
+            return;
+        }
+
+        _context.UsedDiscounts.Add(new UsedDiscount
+        {
+            UserId = userId,
+            DiscountId = discountId,
+            UsedAt = DateTime.Now
+        });
+        _context.SaveChanges();
     }
 }

@@ -22,6 +22,11 @@ namespace RetailECommerce.Controllers
 
         private const string CartSessionKey = "ShoppingCart";
 
+        // NOTE: This codebase identifies the shopper as user 1 throughout
+        // (see DataSeeder). Centralised here so it's easy to swap for the
+        // real logged-in user id later.
+        private int CurrentUserId => 1;
+
         private List<CartItem> GetCartItems()
         {
             var cartJson = HttpContext.Session.GetString(CartSessionKey);
@@ -49,6 +54,10 @@ namespace RetailECommerce.Controllers
 
             // Discount codes the user can choose from on the order page.
             ViewBag.AvailableDiscounts = _discountService.GetAvailableDiscounts().ToList();
+
+            // Discounts this user has already redeemed - the view renders these
+            // as disabled so they can't be picked again.
+            ViewBag.UsedDiscountIds = _discountService.GetUsedDiscountIds(CurrentUserId).ToHashSet();
         }
 
         public IActionResult Index()
@@ -62,12 +71,13 @@ namespace RetailECommerce.Controllers
         {
             LoadCartData();
 
-            int userId = 1;
+            int userId = CurrentUserId;
             int orderId = new Random().Next(1000, 9999);
 
-            // Apply the chosen discount to the subtotal (before tax). Expired or
-            // unknown codes are rejected and the full subtotal is charged.
-            var discountResult = _discountService.ApplyDiscount(discountCode, subtotal);
+            // Apply the chosen discount to the subtotal (before tax). Expired,
+            // unknown, or already-used codes are rejected and the full subtotal
+            // is charged.
+            var discountResult = _discountService.ApplyDiscount(discountCode, subtotal, userId);
             decimal payableSubtotal = discountResult.DiscountedSubtotal;
 
             // Build the item list from the shopper's actual cart.
@@ -102,6 +112,16 @@ namespace RetailECommerce.Controllers
                 paymentStatus = "Failed";
                 notificationMessage =
                     $"Payment failed. Order #{orderId} was not placed. Reason: {checkoutResult.Message}";
+            }
+
+            // The order went through (paid now, or to be paid on delivery), so
+            // mark the discount as used by this user. It will then show up as
+            // disabled the next time they reach checkout.
+            if (discountResult.IsApplied
+                && discountResult.Discount != null
+                && paymentStatus != "Failed")
+            {
+                _discountService.RecordDiscountUsed(userId, discountResult.Discount.Id);
             }
 
             var notification = new Notification
