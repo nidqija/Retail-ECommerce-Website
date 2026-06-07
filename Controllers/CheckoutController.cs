@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Discounts;
@@ -19,17 +20,32 @@ namespace RetailECommerce.Controllers
             _discountService = discountService;
         }
 
+        private const string CartSessionKey = "ShoppingCart";
+
+        private List<CartItem> GetCartItems()
+        {
+            var cartJson = HttpContext.Session.GetString(CartSessionKey);
+
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                return new List<CartItem>();
+            }
+
+            return JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new List<CartItem>();
+        }
+
         private void LoadCartData()
         {
-            ViewBag.OrderItems = new[]
-            {
-                new { Name = "Mechanical Keyboard", Price = 89.99m, Quantity = 1 },
-                new { Name = "27\" IPS Monitor", Price = 329.00m, Quantity = 1 },
-            };
+            // Pull the real cart the shopper built (stored in session by CartController).
+            var cartItems = GetCartItems();
+            ViewBag.OrderItems = cartItems;
 
-            ViewBag.Subtotal = 418.99m;
-            ViewBag.Tax = Math.Round(418.99m * 0.08m, 2);
-            ViewBag.Total = ViewBag.Subtotal + ViewBag.Tax;
+            decimal subtotal = cartItems.Sum(i => i.Price * i.Quantity);
+            decimal tax = Math.Round(subtotal * 0.08m, 2);
+
+            ViewBag.Subtotal = subtotal;
+            ViewBag.Tax = tax;
+            ViewBag.Total = subtotal + tax;
 
             // Discount codes the user can choose from on the order page.
             ViewBag.AvailableDiscounts = _discountService.GetAvailableDiscounts().ToList();
@@ -54,11 +70,9 @@ namespace RetailECommerce.Controllers
             var discountResult = _discountService.ApplyDiscount(discountCode, subtotal);
             decimal payableSubtotal = discountResult.DiscountedSubtotal;
 
-            var cartItems = new Dictionary<string, object>
-            {
-                { "Mechanical Keyboard", 89.99m },
-                { "27\" IPS Monitor", 329.00m }
-            };
+            // Build the item list from the shopper's actual cart.
+            var cartItems = GetCartItems()
+                .ToDictionary(i => i.Name, i => (object)i.Price);
 
             var checkoutResult = _checkoutFacade.ProcessCheckout(
                 paymentType,
