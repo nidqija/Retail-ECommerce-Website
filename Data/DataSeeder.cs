@@ -172,41 +172,108 @@ public class DataSeeder
         {
             var discounts = new List<Discount>
             {
-               new Discount 
-               { 
-                   DiscountName = "Summer Sale", 
-                   Description = "Get 25% off on all summer clothing!", 
-                   DiscountCode = "SUMMER25", 
-                   DiscountPercentage = 25, 
-                   StartDate = DateTime.Now.AddDays(-10), 
-                   EndDate = DateTime.Now.AddDays(20) 
+               // ---------- VALID / ACTIVE (show up and are selectable) ----------
+               new Discount
+               {
+                   DiscountName = "Summer Sale",
+                   Description = "Get 25% off on all summer clothing!",
+                   DiscountCode = "SUMMER25",
+                   DiscountPercentage = 25,
+                   StartDate = DateTime.Now.AddDays(-10),
+                   EndDate = DateTime.Now.AddDays(20)
                },
-               new Discount 
-               { 
-                   DiscountName = "Winter Sale", 
-                   Description = "Enjoy 30% off on winter wear!", 
-                   DiscountCode = "WINTER30", 
-                   DiscountPercentage = 30, 
-                   StartDate = DateTime.Now.AddDays(-20), 
-                   EndDate = DateTime.Now.AddDays(-5) 
+               new Discount
+               {
+                   DiscountName = "Welcome Offer",
+                   Description = "10% off for new shoppers.",
+                   DiscountCode = "WELCOME10",
+                   DiscountPercentage = 10,
+                   StartDate = DateTime.Now.AddDays(-30),
+                   EndDate = DateTime.Now.AddDays(60)
                },
-               new Discount 
-               { 
-                   DiscountName = "Black Friday", 
-                   Description = "Massive 50% off on all products!", 
-                   DiscountCode = "BLACKFRIDAY50", 
-                   DiscountPercentage = 50, 
-                   StartDate = DateTime.Now.AddDays(10), 
-                   EndDate = DateTime.Now.AddDays(15) 
+               new Discount
+               {
+                   DiscountName = "Mid-Year Deal",
+                   Description = "15% off storewide.",
+                   DiscountCode = "MIDYEAR15",
+                   DiscountPercentage = 15,
+                   StartDate = DateTime.Now.AddDays(-5),
+                   EndDate = DateTime.Now.AddDays(30)
+               },
+
+               // ---------- ALREADY USED (active, but seeded as used by user 1 below) ----------
+               // This one shows up at checkout but rendered DISABLED ("already used").
+               new Discount
+               {
+                   DiscountName = "Loyalty Reward",
+                   Description = "20% off - one use per customer.",
+                   DiscountCode = "LOYAL20",
+                   DiscountPercentage = 20,
+                   StartDate = DateTime.Now.AddDays(-15),
+                   EndDate = DateTime.Now.AddDays(45)
+               },
+
+               // ---------- EXPIRED (ended in the past - rejected if submitted) ----------
+               new Discount
+               {
+                   DiscountName = "Winter Sale",
+                   Description = "Enjoy 30% off on winter wear!",
+                   DiscountCode = "WINTER30",
+                   DiscountPercentage = 30,
+                   StartDate = DateTime.Now.AddDays(-20),
+                   EndDate = DateTime.Now.AddDays(-5)
+               },
+               new Discount
+               {
+                   DiscountName = "Flash Sale",
+                   Description = "40% off - this deal has ended.",
+                   DiscountCode = "FLASH40",
+                   DiscountPercentage = 40,
+                   StartDate = DateTime.Now.AddDays(-3),
+                   EndDate = DateTime.Now.AddDays(-1)
+               },
+
+               // ---------- NOT STARTED YET (future - rejected if submitted) ----------
+               new Discount
+               {
+                   DiscountName = "Black Friday",
+                   Description = "Massive 50% off on all products!",
+                   DiscountCode = "BLACKFRIDAY50",
+                   DiscountPercentage = 50,
+                   StartDate = DateTime.Now.AddDays(10),
+                   EndDate = DateTime.Now.AddDays(15)
                }
             };
 
             context.Discounts.AddRange(discounts);
             await context.SaveChangesAsync();
-        } 
+        }
         else
         {
             Console.WriteLine("Discounts already exist in the database. Skipping seeding.");
+        }
+
+        // Seed an "already used" discount so the disabled-at-checkout behaviour
+        // can be tested out of the box. Marks LOYAL20 as used by user 1 (admin).
+        if (!context.UsedDiscounts.Any())
+        {
+            var firstUser = context.Users.OrderBy(u => u.UserId).FirstOrDefault();
+            var usedDiscount = context.Discounts.FirstOrDefault(d => d.DiscountCode == "LOYAL20");
+
+            if (firstUser != null && usedDiscount != null)
+            {
+                context.UsedDiscounts.Add(new UsedDiscount
+                {
+                    UserId = firstUser.UserId,
+                    DiscountId = usedDiscount.Id,
+                    UsedAt = DateTime.Now.AddDays(-2)
+                });
+                await context.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            Console.WriteLine("Used discounts already exist in the database. Skipping seeding.");
         }
     }
 }
