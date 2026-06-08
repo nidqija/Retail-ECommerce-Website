@@ -5,6 +5,7 @@ using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 using RetailECommerce.Services.Logging;
+using RetailECommerce.Services.State.Order;
 
 public class AdminController : Controller
 {
@@ -152,10 +153,25 @@ public class AdminController : Controller
         var order = _context.Orders.Find(id);
         if (order != null)
         {
-            string oldStatus = order.OrderStatus;
-            order.OrderStatus = status;
-            _context.SaveChanges();
-            AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Order ID: {id} status updated from '{oldStatus}' to '{status}'.");
+            try
+            {
+                // 5. Concrete State Implementation
+                // declare object of the state manager class, 
+                // passing in the current order from the database to 
+                // initialize the current state based on the order's status
+                var orderStateManager = new OrderStateManager(order);
+
+                // use the state manager function to attempt the transition to the new status,
+                orderStateManager.TransitionTo(status);
+
+                // save changes to the database if the transition was successful,
+                _context.SaveChanges();
+                AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Order ID: {id} status updated successfully to '{status}'.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Failed to update order ID: {id} status to '{status}'. Error: {ex.Message}");
+            }
         }
         else
         {

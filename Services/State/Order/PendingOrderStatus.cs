@@ -5,24 +5,13 @@ using RetailECommerce.Models;
 public class PendingOrderStatus : IOrderStatus
 {
     public string StatusName => "Pending";
+    
 
-    public void ProcessOrder()
+
+    public bool CanTransitionToNextStatus(string targetStatusName)
     {
-        Console.WriteLine("Processing pending order.");
+        return targetStatusName == "Processing" || targetStatusName == "Cancelled";
     }
 
-    public void ShipOrder()
-    {
-        Console.WriteLine("Order is pending. Cannot ship.");
-    }
-
-    public void DeliverOrder()
-    {
-        Console.WriteLine("Order is pending. Cannot deliver.");
-    }
-
-    public void CancelOrder()
-    {
-        Console.WriteLine("Cancelling pending order.");
-    }
+    
 }

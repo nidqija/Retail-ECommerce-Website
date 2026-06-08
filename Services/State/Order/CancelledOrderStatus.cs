@@ -6,23 +6,10 @@ public class CancelledOrderStatus : IOrderStatus
 {
     public string StatusName => "Cancelled";
 
-    public void ProcessOrder()
+    public bool CanTransitionToNextStatus(string targetStatusName)
     {
-        Console.WriteLine("Order is cancelled. Cannot process.");
-    }
-
-    public void ShipOrder()
-    {
-        Console.WriteLine("Order is cancelled. Cannot ship.");
-    }
-
-    public void DeliverOrder()
-    {
-        Console.WriteLine("Order is cancelled. Cannot deliver.");
-    }
-
-    public void CancelOrder()
-    {
-        Console.WriteLine("Order is already cancelled.");
+        Console.WriteLine($"Attempting to transition from {StatusName} to {targetStatusName}.");
+        Console.WriteLine("Transition not allowed. Order is already cancelled.");
+        return false;
     }
 }
