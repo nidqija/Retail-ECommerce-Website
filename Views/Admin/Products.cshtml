@@ -50,12 +50,12 @@
                             <td class="text-center">
                                 <a asp-controller="Admin" asp-action="EditProduct"
                                    asp-route-id="@p.ProductId"
-                                   class="btn btn-outline-primary btn-sm me-1" title="Edit">✏️</a>
+                                   class="btn btn-outline-primary btn-sm me-1" title="Edit">Edit</a>
                                 <form asp-controller="Admin" asp-action="DeleteProduct"
                                       asp-route-id="@p.ProductId" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-outline-danger btn-sm"
                                             title="Delete"
-                                            onclick="return confirm('Delete this product?')">🗑️</button>
+                                            onclick="return confirm('Delete this product?')">Delete</button>
                                 </form>
                             </td>
                         </tr>

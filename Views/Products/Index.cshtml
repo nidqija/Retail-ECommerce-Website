@@ -11,7 +11,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">Product Catalog (hardcoded HTML data,not linked to database) </h1>
     <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary">
-        🛒 View Cart
+        View Cart
     </a>
 </div>
 
@@ -50,7 +50,7 @@
                     </select>
                     @if (!string.IsNullOrEmpty(selectedCategory))
                     {
-                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary btn-sm">✕</a>
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary btn-sm">Clear</a>
                     }
                 </div>
                 <input type="hidden" name="searchKeyword" value="@searchKeyword">
@@ -72,7 +72,7 @@
                     </select>
                     @if (!string.IsNullOrEmpty(selectedSubCategory))
                     {
-                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary btn-sm">✕</a>
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-secondary btn-sm">Clear</a>
                     }
                 </div>
                 <input type="hidden" name="searchKeyword" value="@searchKeyword">
@@ -92,7 +92,7 @@
 @if (!products.Any())
 {
     <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
-        <span>⚠️</span>
+        <span></span>
         <div>
             No products match your search criteria. 
             @if (!string.IsNullOrEmpty(searchKeyword) || !string.IsNullOrEmpty(selectedCategory))
@@ -111,7 +111,7 @@ else
                 <div class="card h-100 shadow-sm">
                     <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
                          style="height:180px; font-size:3rem;">
-                        📦
+                        
                     </div>
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">@p.Name</h5>

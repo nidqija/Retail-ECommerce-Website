@@ -10,8 +10,8 @@ public class DataSeeder
         // Ensure the database is created
         await context.Database.MigrateAsync();
 
-        // Check if there are any users in the database
-        if (!context.Users.Any())
+        // Check if Admin exists
+        if (!context.Users.Any(u => u.Role == UserRole.Vendor))
         {
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword("admin123");
             // If not, create a default admin user
@@ -27,6 +27,23 @@ public class DataSeeder
         } else
         {
             Console.WriteLine("Admin already exist in the database. Skipping seeding.");
+        }
+
+        // Check if Customers exist
+        if (!context.Users.Any(u => u.Email == "customer1@example.com"))
+        {
+            var hashedCustomerPassword = BCrypt.Net.BCrypt.HashPassword("customer123");
+            var customers = new List<User>
+            {
+                new User { FullName = "Customer One", Email = "customer1@example.com", Password = hashedCustomerPassword, Role = UserRole.Customer },
+                new User { FullName = "Customer Two", Email = "customer2@example.com", Password = hashedCustomerPassword, Role = UserRole.Customer },
+                new User { FullName = "Customer Three", Email = "customer3@example.com", Password = hashedCustomerPassword, Role = UserRole.Customer }
+            };
+            context.Users.AddRange(customers);
+            await context.SaveChangesAsync();
+        } else
+        {
+            Console.WriteLine("Customers already exist in the database. Skipping seeding.");
         }
     }
 
