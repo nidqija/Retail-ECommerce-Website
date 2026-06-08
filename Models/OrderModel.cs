@@ -15,8 +15,17 @@ public class Order
     public DateTime OrderDate { get; set; } = DateTime.Now;
     
     public decimal TotalAmount { get; set; }
-    
-    public string OrderStatus { get; set; } = "Pending"; 
+
+    // Receipt breakdown captured at checkout (so the order detail page can show
+    // an accurate summary later, not just the grand total).
+    public decimal Subtotal { get; set; }
+
+    public decimal Tax { get; set; }
+
+    // How the customer paid: "Credit / Debit Card", "QR Pay", "Cash on Delivery".
+    public string? PaymentMethod { get; set; }
+
+    public string OrderStatus { get; set; } = "Pending";
     
     public int? PaymentId { get; set; }
     [ForeignKey(nameof(PaymentId))]
