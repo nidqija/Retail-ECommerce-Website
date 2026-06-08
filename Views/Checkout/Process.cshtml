@@ -97,6 +97,14 @@
                         <span>@ViewBag.Subtotal?.ToString("C") ?? "N/A"</span>
                     </div>
 
+                    @if (ViewBag.DiscountApplied == true)
+                    {
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <strong>Discount (@ViewBag.DiscountCode):</strong>
+                            <span>-@(((decimal)ViewBag.DiscountAmount).ToString("C"))</span>
+                        </div>
+                    }
+
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Tax (8%):</strong>
                         <span>@ViewBag.Tax?.ToString("C") ?? "N/A"</span>

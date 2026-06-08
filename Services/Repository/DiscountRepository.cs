@@ -19,6 +19,30 @@ public class DiscountRepository : IDiscountRepository
         return _context.Discounts.ToList();
     }
 
+    public IEnumerable<Discount> GetActiveDiscounts()
+    {
+        var now = DateTime.Now;
+        // IsActive is a computed property (not mapped), so the date window is
+        // filtered in the query and IsActive is used as a final safety check.
+        return _context.Discounts
+            .Where(d => now >= d.StartDate && now <= d.EndDate)
+            .ToList()
+            .Where(d => d.IsActive)
+            .ToList();
+    }
+
+    public Discount? GetDiscountByCode(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return null;
+        }
+
+        var normalized = code.Trim().ToUpper();
+        return _context.Discounts
+            .FirstOrDefault(d => d.DiscountCode.ToUpper() == normalized);
+    }
+
     public Discount GetDiscountById(int id)
     {
         var discount = _context.Discounts.FirstOrDefault(d => d.Id == id);
@@ -76,8 +100,39 @@ public class DiscountRepository : IDiscountRepository
         var discount = _context.Discounts.FirstOrDefault(d => d.Id == id);
         if (discount != null)
         {
-            discount.EndDate = DateTime.Now.AddDays(30); 
+            discount.EndDate = DateTime.Now.AddDays(30);
             _context.SaveChanges();
         }
+    }
+
+    public IEnumerable<int> GetUsedDiscountIds(int userId)
+    {
+        return _context.UsedDiscounts
+            .Where(ud => ud.UserId == userId)
+            .Select(ud => ud.DiscountId)
+            .ToList();
+    }
+
+    public bool HasUserUsedDiscount(int userId, int discountId)
+    {
+        return _context.UsedDiscounts
+            .Any(ud => ud.UserId == userId && ud.DiscountId == discountId);
+    }
+
+    public void RecordDiscountUsed(int userId, int discountId)
+    {
+        // Don't double-record the same (user, discount) pair.
+        if (HasUserUsedDiscount(userId, discountId))
+        {
+            return;
+        }
+
+        _context.UsedDiscounts.Add(new UsedDiscount
+        {
+            UserId = userId,
+            DiscountId = discountId,
+            UsedAt = DateTime.Now
+        });
+        _context.SaveChanges();
     }
 }

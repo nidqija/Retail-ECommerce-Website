@@ -20,6 +20,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IEnquiryRepository, EnquiryRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
+builder.Services.AddScoped<RetailECommerce.Services.Discounts.IDiscountService, RetailECommerce.Services.Discounts.DiscountService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
