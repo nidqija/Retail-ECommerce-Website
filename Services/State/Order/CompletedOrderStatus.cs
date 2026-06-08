@@ -7,23 +7,10 @@ public class CompletedOrderStatus : IOrderStatus
 {
     public string StatusName => "Completed";
 
-    public void ProcessOrder()
+    public bool CanTransitionToNextStatus(string targetStatusName)
     {
-        Console.WriteLine("Order is already completed. Cannot process.");
-    }
-
-    public void ShipOrder()
-    {
-        Console.WriteLine("Order is already completed. Cannot ship.");
-    }
-
-    public void DeliverOrder()
-    {
-        Console.WriteLine("Order is already completed. Cannot deliver.");
-    }
-
-    public void CancelOrder()
-    {
-        Console.WriteLine("Order is already completed. Cannot cancel.");
+        Console.WriteLine($"Attempting to transition from {StatusName} to {targetStatusName}.");
+        Console.WriteLine("Transition not allowed. Order is already completed.");
+        return false;
     }
 }

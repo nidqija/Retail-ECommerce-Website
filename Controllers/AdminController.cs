@@ -5,6 +5,7 @@ using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 using RetailECommerce.Services.Logging;
+using RetailECommerce.Services.State.Order;
 
 public class AdminController : Controller
 {
@@ -152,10 +153,18 @@ public class AdminController : Controller
         var order = _context.Orders.Find(id);
         if (order != null)
         {
-            string oldStatus = order.OrderStatus;
-            order.OrderStatus = status;
-            _context.SaveChanges();
-            AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Order ID: {id} status updated from '{oldStatus}' to '{status}'.");
+            try
+            {
+                var orderStateManager = new OrderStateManager(order);
+
+                orderStateManager.TransitionTo(status);
+                _context.SaveChanges();
+                AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Order ID: {id} status updated successfully to '{status}'.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Failed to update order ID: {id} status to '{status}'. Error: {ex.Message}");
+            }
         }
         else
         {

@@ -6,11 +6,5 @@ public interface IOrderStatus
 {
     string StatusName { get; }
 
-    void ProcessOrder();
-
-    void ShipOrder();
-
-    void DeliverOrder();
-
-    void CancelOrder();
+    bool CanTransitionToNextStatus(string targetStatusName);
 }
