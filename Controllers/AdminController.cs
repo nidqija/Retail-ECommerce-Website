@@ -155,9 +155,16 @@ public class AdminController : Controller
         {
             try
             {
+                // 5. Concrete State Implementation
+                // declare object of the state manager class, 
+                // passing in the current order from the database to 
+                // initialize the current state based on the order's status
                 var orderStateManager = new OrderStateManager(order);
 
+                // use the state manager function to attempt the transition to the new status,
                 orderStateManager.TransitionTo(status);
+
+                // save changes to the database if the transition was successful,
                 _context.SaveChanges();
                 AdminLogger.Instance.Log($"AdminController.UpdateOrderStatus [POST]: Order ID: {id} status updated successfully to '{status}'.");
             }

@@ -3,6 +3,10 @@ using RetailECommerce.Models;
 
 
 
+
+// 2. State Manager Class
+// this class manages the current state of an order and handles state transitions,
+// ensuring that transitions are valid according to the rules defined in each state class.
 public class OrderStateManager
 {
     
@@ -18,6 +22,8 @@ public class OrderStateManager
         _order = order;
 
         CurrentState = _order.OrderStatus switch
+        // declare concrete states based on the order's current status, 
+        // defaulting to Pending if the status is unrecognized
         {
             "Processing" => new ProcessingOrderStatus(),
             "Shipped" => new ShippedOrderStatus(),
@@ -28,6 +34,8 @@ public class OrderStateManager
         };
     }
 
+    // method to transition to a new state, 
+    // checking if the transition is valid before updating the order's status
     public void TransitionTo(string targetStatusName)
     {
         if(!CurrentState.CanTransitionToNextStatus(targetStatusName))
