@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using RetailECommerce.Models;
@@ -22,10 +23,35 @@ namespace RetailECommerce.Controllers
 
         private const string CartSessionKey = "ShoppingCart";
 
-        // NOTE: This codebase identifies the shopper as user 1 throughout
-        // (see DataSeeder). Centralised here so it's easy to swap for the
-        // real logged-in user id later.
-        private int CurrentUserId => 1;
+        // Resolve the logged-in shopper's id from their auth cookie / session.
+        // Login (SignInController) stores the email as the Name claim and in the
+        // "UserEmail" session key; we look that email up in the Users table.
+        // Falls back to the seeded user 1 if no one is signed in, so checkout
+        // still works in a fresh/demo session.
+        private int CurrentUserId
+        {
+            get
+            {
+                var email = User.FindFirstValue(ClaimTypes.Name)
+                            ?? HttpContext.Session.GetString("UserEmail");
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    var userId = _context.Users
+                        .Where(u => u.Email == email)
+                        .Select(u => (int?)u.UserId)
+                        .FirstOrDefault();
+
+                    if (userId.HasValue)
+                    {
+                        return userId.Value;
+                    }
+                }
+
+                // No signed-in user found - fall back to the seeded demo user.
+                return 1;
+            }
+        }
 
         private List<CartItem> GetCartItems()
         {
