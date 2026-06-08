@@ -44,7 +44,7 @@ public class DiscountController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, "An error occurred while deactivating the discount.");
+            return StatusCode(500, "An error occurred while deactivating the discount." + ex.Message);
         }
     }
 
@@ -66,7 +66,7 @@ public class DiscountController : Controller
         }
         catch (Exception ex)
         {
-            return StatusCode(500, "An error occurred while activating the discount.");
+            return StatusCode(500, "An error occurred while activating the discount." + ex.Message );
         }
     }
 
