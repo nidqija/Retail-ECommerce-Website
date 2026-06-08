@@ -147,6 +147,33 @@
             </form>
         </div>
 
+        <!-- SEGMENT 1.5: ORDERS -->
+        <div class="report-card p-4 mb-4">
+            <div class="d-flex align-items-center mb-3">
+                <h2 class="h4 card-title m-0">Orders &amp; Fulfillment</h2>
+            </div>
+            <p class="text-muted small mb-4">Generate order lists filtered by date range — includes totals, statuses, and customer details.</p>
+
+            <form class="report-form" asp-controller="Report" asp-action="GenerateReport" method="get">
+                <input type="hidden" name="reportType" value="" />
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="startDate" class="form-label col-form-label-sm fw-semibold text-secondary">Start Date</label>
+                        <input type="date" id="startDate" name="startDate" class="form-control custom-select" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="endDate" class="form-label col-form-label-sm fw-semibold text-secondary">End Date</label>
+                        <input type="date" id="endDate" name="endDate" class="form-control custom-select" />
+                    </div>
+                    <div class="col-12 mt-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-export btn-pdf report-btn" name="dataType" data-format="PDF" value="OrderReport">Export Orders (PDF)</button>
+                        <button type="submit" class="btn btn-export btn-csv report-btn" name="dataType" data-format="CSV" value="OrderReport">Export Orders (CSV)</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- SEGMENT 2: OTHER CORES -->
         <div class="report-card p-4">
             <h2 class="h4 card-title mb-2">Core System Collections</h2>

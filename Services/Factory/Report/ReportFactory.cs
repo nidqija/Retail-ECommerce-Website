@@ -21,6 +21,7 @@ public class ReportFactory
             "ProductReport" => new ProductReportData(_context),
             "UserReport" => new UserReportData(_context),
             "PaymentReport" => new PaymentReportData(_context),
+            "OrderReport" => new OrderReportData(_context),
             _ => throw new ArgumentException("Invalid report data type")
         };
     }

@@ -113,3 +113,33 @@ public class PaymentReportData : IReportData
 }
 
 
+
+public class OrderReportData : IReportData
+{
+    private readonly MyDbContext _context;
+    public string TargetReportDataType => "OrderReport";
+
+    public OrderReportData(MyDbContext context)
+    {
+        _context = context;
+    }
+
+    public ReportData MapData(Dictionary<string, string>? parameters = null)
+    {
+        var reportData = new ReportData
+        {
+            Title = "Order Report",
+            Headers = new List<string> { "User Email", "Total Amount", "Order Status" },
+            Rows = _context.Orders.Select(o => new List<string>
+            {
+                o.User.Email,
+                $"${o.TotalAmount}",
+                o.OrderStatus
+            }).ToList()
+         };
+
+         return reportData;
+        }
+}
+
+
