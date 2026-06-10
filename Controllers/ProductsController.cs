@@ -49,8 +49,8 @@ public ProductsController(
         // Apply search filter by keyword
         if (!string.IsNullOrEmpty(searchKeyword))
         {
-            products = products.Where(p => 
-                p.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase) || 
+            products = products.Where(p =>
+                p.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase)
             ).ToList();
         }
@@ -66,7 +66,7 @@ public ProductsController(
         {
             products = products.Where(p => p.SubCategory.Equals(subCategory, StringComparison.OrdinalIgnoreCase)).ToList();
         }
-        
+
         var allCategories = new List<Product>
         {
             new Product { ProductId = 1, Name = "Mechanical Keyboard",  Description = "Tactile switches, full RGB backlight, detachable cable.",   Price = 89.99m,  StockQuantity = 42, Category = "Computers & Accessories", SubCategory = "Technology" },
@@ -79,7 +79,7 @@ public ProductsController(
             new Product { ProductId = 8, Name = "Bluetooth Speaker",    Description = "Portable speaker with deep bass and 12-hour battery life.",   Price = 59.99m,  StockQuantity = 25, Category = "Audio & Headphones", SubCategory = "Technology" },
             new Product { ProductId = 9, Name = "Sport Shoes",             Description = "Comfortable shoes for sports activities.",        Price = 29.99m,  StockQuantity = 50, Category = "Sports & Outdoors", SubCategory = "Apparel" },
         };
-        
+
         var categories = allCategories.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
         var subCategories = allCategories.Select(p => p.SubCategory).Distinct().OrderBy(sc => sc).ToList();
 

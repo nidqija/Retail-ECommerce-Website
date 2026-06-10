@@ -9,9 +9,6 @@
     var usedDiscountIds = (ViewBag.UsedDiscountIds as HashSet<int>) ?? new HashSet<int>();
 }
 
-<!-- QR Code Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-
 <div class="container mt-5">
     <h2>Checkout</h2>
     <hr />
@@ -32,7 +29,7 @@
     <div class="row">
         <div class="col-md-7">
             <h4>Select Payment Method</h4>
-            <form asp-controller="Checkout" asp-action="Process" method="post" id="checkoutForm">
+            <form asp-controller="Checkout" asp-action="Process" method="post" id="checkoutForm" enctype="multipart/form-data">
                 <input type="hidden" name="subtotal" value="@ViewBag.Subtotal" />
 
                 <!-- Discount Code Selection -->
@@ -90,14 +87,18 @@
 
                 <!-- QR Payment Info Section -->
                 <div id="qrPaymentContainer" class="border p-3 rounded bg-light mb-4" style="display: none;">
-                    <h5>QR Payment Instructions</h5>
-                    <p class="text-muted mb-0">Click the button below to view the QR code. Scan it with your e-wallet app to complete payment.</p>
+                    <h5>📱 QR Payment</h5>
+                    <p class="text-muted">Open your camera and point it at your payment QR code (TNG eWallet / GrabPay). Payment completes automatically as soon as the QR is detected.</p>
+                    <button type="button" id="openCameraButton" class="btn btn-info">📷 Open Camera &amp; Scan</button>
+                    <div id="qrScannerArea" class="mt-3" style="display: none;">
+                        <video id="qrVideo" muted playsinline class="w-100 border rounded" style="max-width: 400px;"></video>
+                        <p id="qrScanStatus" class="text-muted mt-2 mb-0">Point your camera at the QR code…</p>
+                    </div>
+                    <!-- Captured camera frame is attached here and verified server-side. -->
+                    <input type="file" name="qrProof" id="qrProof" class="d-none" accept="image/*" tabindex="-1" />
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="button" id="viewQRButton" class="btn btn-info btn-lg" style="display: none;">
-                        View QR Code to Scan
-                    </button>
                     <button type="submit" class="btn btn-primary btn-lg w-100" id="placeOrderButton">Place Order (@ViewBag.Total.ToString("C"))</button>
                 </div>
             </form>
@@ -113,7 +114,7 @@
                         @foreach (var item in ViewBag.OrderItems)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @item.Name (x@item.Quantity)
+                                @item.Name (x@(item.Quantity))
                                 <span>@((item.Price * item.Quantity).ToString("C"))</span>
                             </li>
                         }
@@ -144,45 +145,7 @@
     </div>
 </div>
 
-<!-- QR Code Modal -->
-<div class="modal fade" id="qrCodeModal" tabindex="-1" role="dialog" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="qrCodeModalLabel">Scan QR Code to Pay</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <div class="mb-3">
-                    <p class="text-muted">Open your e-wallet app and scan this QR code</p>
-                    <canvas id="qrCanvas" width="300" height="300" class="border rounded p-2 bg-light"></canvas>
-                </div>
-                <div class="alert alert-info mb-0">
-                    <strong>Amount to pay:</strong> <br>
-                    <span id="qrAmount" class="h4 text-primary">@ViewBag.Total.ToString("C")</span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <p class="text-muted mb-0 w-100">
-                    <small>Having trouble? You can complete the payment by clicking "Place Order" after scanning.</small>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-    #qrCanvas {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    #viewQRButton {
-        margin-bottom: 0.5rem;
-    }
-
     .form-check-label {
         cursor: pointer;
         user-select: none;
@@ -198,11 +161,6 @@
         const paymentTypeRadios = document.querySelectorAll('input[name="paymentType"]');
         const cardDetailsContainer = document.getElementById('cardDetailsContainer');
         const qrPaymentContainer = document.getElementById('qrPaymentContainer');
-        const viewQRButton = document.getElementById('viewQRButton');
-        const qrCodeModal = new bootstrap.Modal(document.getElementById('qrCodeModal'), {
-            keyboard: false,
-            backdrop: 'static'
-        });
 
         // Payment method selection handler
         paymentTypeRadios.forEach(radio => {
@@ -215,68 +173,18 @@
             // Hide all containers
             cardDetailsContainer.style.display = 'none';
             qrPaymentContainer.style.display = 'none';
-            viewQRButton.style.display = 'none';
 
             // Show relevant container
             if (paymentMethod === 'card') {
                 cardDetailsContainer.style.display = 'block';
             } else if (paymentMethod === 'qr') {
                 qrPaymentContainer.style.display = 'block';
-                viewQRButton.style.display = 'block';
             }
             // For COD, show nothing - just the Place Order button
         }
 
-        // Generate QR code when button is clicked
-        viewQRButton.addEventListener('click', function (e) {
-            e.preventDefault();
-            generateAndShowQRCode();
-        });
-
-        function generateAndShowQRCode() {
-            const subtotal = parseFloat('@ViewBag.Subtotal');
-            // Use the live total (reflects any selected discount); fall back to server value.
-            const total = (typeof window.currentTotal === 'number')
-                ? window.currentTotal
-                : parseFloat('@ViewBag.Total');
-
-            // Create QR code data (payment URL or transaction details)
-            // Format: amount|currency|timestamp|reference
-            const timestamp = Date.now();
-            const qrData = `payment|MYR|${total.toFixed(2)}|${timestamp}|TNG_EWALLET_GRABPAY`;
-
-            // Generate QR code using Qrious library
-            const qr = new QRious({
-                element: document.getElementById('qrCanvas'),
-                value: qrData,
-                size: 300,
-                level: 'H',
-                mime: 'image/png'
-            });
-
-            // Show the modal
-            qrCodeModal.show();
-        }
-
         // Initialize with card payment selected
         handlePaymentMethodChange('card');
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const radios = document.querySelectorAll('input[name="paymentType"]');
-        const cardDetails = document.getElementById('cardDetailsContainer');
-
-        radios.forEach(radio => {
-            radio.addEventListener('change', function () {
-                if (this.value === 'card') {
-                    cardDetails.style.display = 'block';
-                } else {
-                    cardDetails.style.display = 'none';
-                }
-            });
-        });
     });
 </script>
 
@@ -293,7 +201,6 @@
         const taxValue = document.getElementById('taxValue');
         const totalValue = document.getElementById('totalValue');
         const placeOrderButton = document.getElementById('placeOrderButton');
-        const qrAmount = document.getElementById('qrAmount');
 
         const money = v => '$' + v.toFixed(2);
 
@@ -317,15 +224,129 @@
             taxValue.textContent = money(tax);
             totalValue.textContent = money(total);
             placeOrderButton.textContent = 'Place Order (' + money(total) + ')';
-            if (qrAmount) {
-                qrAmount.textContent = money(total);
-            }
-
-            // Expose the current total so the QR generator stays in sync.
-            window.currentTotal = total;
         }
 
         discountSelect.addEventListener('change', recalculate);
         recalculate();
+    });
+</script>
+
+<!-- jsQR: client-side QR detection from the live camera feed -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('checkoutForm');
+        const openCameraButton = document.getElementById('openCameraButton');
+        const scannerArea = document.getElementById('qrScannerArea');
+        const video = document.getElementById('qrVideo');
+        const statusText = document.getElementById('qrScanStatus');
+        const qrProofInput = document.getElementById('qrProof');
+
+        // Offscreen canvas used to grab video frames for jsQR (and to capture
+        // the detected frame, which is sent to the server for verification).
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        let stream = null;
+        let scanning = false;
+        let qrCompleted = false;
+
+        openCameraButton.addEventListener('click', async function () {
+            if (scanning) return;
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+            } catch (err) {
+                statusText.textContent = ' Could not access the camera. Please allow camera permission and try again.';
+                statusText.classList.remove('text-muted');
+                statusText.classList.add('text-danger');
+                scannerArea.style.display = 'block';
+                return;
+            }
+
+            video.srcObject = stream;
+            await video.play();
+
+            scannerArea.style.display = 'block';
+            statusText.textContent = 'Point your camera at the QR code…';
+            statusText.classList.remove('text-danger', 'text-success', 'fw-semibold');
+            statusText.classList.add('text-muted');
+            openCameraButton.disabled = true;
+
+            scanning = true;
+            requestAnimationFrame(scanLoop);
+        });
+
+        function stopCamera() {
+            scanning = false;
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+                stream = null;
+            }
+            openCameraButton.disabled = false;
+        }
+
+        function scanLoop() {
+            if (!scanning) return;
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                if (code) {
+                    // QR found: freeze everything and complete the payment
+                    // immediately with the captured frame as proof.
+                    scanning = false;
+                    statusText.textContent = ' QR code detected — completing payment…';
+                    statusText.classList.remove('text-muted', 'text-danger');
+                    statusText.classList.add('text-success', 'fw-semibold');
+
+                    canvas.toBlob(function (blob) {
+                        stopCamera();
+
+                        const file = new File([blob], 'qr-scan.png', { type: 'image/png' });
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        qrProofInput.files = dt.files;
+
+                        qrCompleted = true;
+                        form.submit();
+                    }, 'image/png');
+                    return;
+                }
+            }
+
+            requestAnimationFrame(scanLoop);
+        }
+
+        // For QR payments the scan IS the payment - block manual submission
+        // until a QR has been scanned.
+        form.addEventListener('submit', function (e) {
+            const selected = document.querySelector('input[name="paymentType"]:checked');
+            if (selected && selected.value === 'qr' && !qrCompleted) {
+                e.preventDefault();
+                scannerArea.style.display = 'block';
+                statusText.textContent = 'Please scan your payment QR code first - click "Open Camera & Scan".';
+                statusText.classList.remove('text-muted', 'text-success', 'fw-semibold');
+                statusText.classList.add('text-danger');
+            }
+        });
+
+        // Switching away from QR Pay shuts the camera off.
+        document.querySelectorAll('input[name="paymentType"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.value !== 'qr') {
+                    stopCamera();
+                    scannerArea.style.display = 'none';
+                }
+            });
+        });
     });
 </script>

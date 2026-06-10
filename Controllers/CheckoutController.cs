@@ -5,6 +5,7 @@ using RetailECommerce.Models;
 using RetailECommerce.Services.Discounts;
 using RetailECommerce.Services.Facades;
 using RetailECommerce.Services.Observers;
+using RetailECommerce.Services.Payment;
 
 namespace RetailECommerce.Controllers
 {
@@ -13,12 +14,14 @@ namespace RetailECommerce.Controllers
         private readonly CheckoutFacade _checkoutFacade;
         private readonly MyDbContext _context;
         private readonly IDiscountService _discountService;
+        private readonly IQrCodeDetector _qrCodeDetector;
 
-        public CheckoutController(MyDbContext context, IDiscountService discountService)
+        public CheckoutController(MyDbContext context, IDiscountService discountService, IQrCodeDetector qrCodeDetector)
         {
             _checkoutFacade = new CheckoutFacade();
             _context = context;
             _discountService = discountService;
+            _qrCodeDetector = qrCodeDetector;
         }
 
         private const string CartSessionKey = "ShoppingCart";
@@ -93,11 +96,36 @@ namespace RetailECommerce.Controllers
         }
 
         [HttpPost]
-        public IActionResult Process(string paymentType, decimal subtotal, string? discountCode)
+        public IActionResult Process(string paymentType, decimal subtotal, string? discountCode, IFormFile? qrProof)
         {
             LoadCartData();
 
+            // Mock QR payment verification: the checkout page scans the QR with
+            // the shopper's camera and submits the captured frame; we confirm
+            // server-side (ZXing) that a QR code really is in that frame.
+            // No QR found -> back to the checkout page so they can rescan.
+            if (paymentType?.ToLower() == "qr")
+            {
+                bool qrDetected = false;
+                if (qrProof != null && qrProof.Length > 0)
+                {
+                    using var stream = qrProof.OpenReadStream();
+                    qrDetected = _qrCodeDetector.ContainsQrCode(stream);
+                }
+
+                if (!qrDetected)
+                {
+                    ModelState.AddModelError("qrProof",
+                        qrProof == null || qrProof.Length == 0
+                            ? "Please scan your payment QR code with your camera to complete the payment."
+                            : "We couldn't verify the scanned QR code. Please try scanning again.");
+                    return View("Index");
+                }
+            }
+
             int userId = CurrentUserId;
+            // Temporary reference used while processing payment; the real, saved
+            // order gets its own database id below.
             int orderId = new Random().Next(1000, 9999);
 
             // Apply the chosen discount to the subtotal (before tax). Expired,
@@ -105,10 +133,12 @@ namespace RetailECommerce.Controllers
             // is charged.
             var discountResult = _discountService.ApplyDiscount(discountCode, subtotal, userId);
             decimal payableSubtotal = discountResult.DiscountedSubtotal;
+            decimal tax = Math.Round(payableSubtotal * 0.08m, 2);
 
-            // Build the item list from the shopper's actual cart.
-            var cartItems = GetCartItems()
-                .ToDictionary(i => i.Name, i => (object)i.Price);
+            // The shopper's actual cart, used both for payment notifications and
+            // for the order line items we persist.
+            var cart = GetCartItems();
+            var cartItems = cart.ToDictionary(i => i.Name, i => (object)i.Price);
 
             var checkoutResult = _checkoutFacade.ProcessCheckout(
                 paymentType,
@@ -118,37 +148,76 @@ namespace RetailECommerce.Controllers
                 cartItems
             );
 
+            // Determine the outcome and the status we store on the order.
+            // (The badge views expect "Completed" / "Pending" / "Failed".)
             string paymentStatus;
-            string notificationMessage;
+            string orderStatus;
 
             if (paymentType?.ToLower() == "cod")
             {
                 paymentStatus = "Pending";
-                notificationMessage =
-                    $"Payment pending. Order #{orderId} has been placed, but payment will be collected during delivery.";
+                orderStatus = "Pending";
             }
             else if (checkoutResult.IsSuccessful)
             {
                 paymentStatus = "Successful";
-                notificationMessage =
-                    $"Payment successful. Your order #{orderId} has been placed. Transaction ID: {checkoutResult.GetTransactionId()}";
+                orderStatus = "Completed";
             }
             else
             {
                 paymentStatus = "Failed";
-                notificationMessage =
-                    $"Payment failed. Order #{orderId} was not placed. Reason: {checkoutResult.Message}";
+                orderStatus = "Failed";
             }
 
-            // The order went through (paid now, or to be paid on delivery), so
-            // mark the discount as used by this user. It will then show up as
-            // disabled the next time they reach checkout.
-            if (discountResult.IsApplied
-                && discountResult.Discount != null
-                && paymentStatus != "Failed")
+            // Persist the order (and its line items) for any order that was
+            // actually placed - paid now, or to be paid on delivery. Failed
+            // payments are not recorded because the order was never placed.
+            int? savedOrderId = null;
+            if (paymentStatus != "Failed" && cart.Any())
             {
-                _discountService.RecordDiscountUsed(userId, discountResult.Discount.Id);
+                var order = new Order
+                {
+                    UserId = userId,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = checkoutResult.TotalAmount,
+                    Subtotal = discountResult.OriginalSubtotal,
+                    Tax = tax,
+                    PaymentMethod = FriendlyPaymentName(paymentType),
+                    OrderStatus = orderStatus,
+                    OrderItems = cart.Select(c => new OrderItem
+                    {
+                        ProductId = c.ProductId,
+                        Quantity = c.Quantity,
+                        UnitPrice = c.Price
+                    }).ToList()
+                };
+
+                _context.Orders.Add(order);
+                _context.SaveChanges();
+                savedOrderId = order.Id;
+
+                // Order went through, so mark the discount as used by this user
+                // (shows as disabled next time they reach checkout).
+                if (discountResult.IsApplied && discountResult.Discount != null)
+                {
+                    _discountService.RecordDiscountUsed(userId, discountResult.Discount.Id);
+                }
+
+                // The order is placed - empty the shopping cart.
+                HttpContext.Session.Remove(CartSessionKey);
             }
+
+            // Use the real saved order id in messaging when we have one.
+            var displayOrderId = savedOrderId ?? orderId;
+            string notificationMessage = paymentStatus switch
+            {
+                "Pending" =>
+                    $"Payment pending. Order #{displayOrderId} has been placed, but payment will be collected during delivery.",
+                "Successful" =>
+                    $"Payment successful. Your order #{displayOrderId} has been placed. Transaction ID: {checkoutResult.GetTransactionId()}",
+                _ =>
+                    $"Payment failed. Order was not placed. Reason: {checkoutResult.Message}"
+            };
 
             var notification = new Notification
             {
@@ -178,10 +247,22 @@ namespace RetailECommerce.Controllers
             ViewBag.DiscountAmount = discountResult.DiscountAmount;
             ViewBag.DiscountMessage = discountResult.Message;
             ViewBag.DiscountCode = discountResult.Discount?.DiscountCode;
-            ViewBag.Tax = Math.Round(payableSubtotal * 0.08m, 2);
+            ViewBag.Tax = tax;
             ViewBag.Total = checkoutResult.TotalAmount;
 
             return View("Process");
+        }
+
+        // Maps the posted payment type to a human-friendly label stored on the order.
+        private static string FriendlyPaymentName(string? paymentType)
+        {
+            return paymentType?.ToLower() switch
+            {
+                "card" => "Credit / Debit Card",
+                "qr" => "QR Pay",
+                "cod" => "Cash on Delivery",
+                _ => "Unknown"
+            };
         }
     }
 }
