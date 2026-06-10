@@ -6,7 +6,5 @@ public interface IPaymentState
 
     void Refund(PaymentContext context);
 
-    void Cancel(PaymentContext context);
-
-
+    
 }
