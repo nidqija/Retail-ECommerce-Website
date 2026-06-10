@@ -26,6 +26,7 @@ builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
 builder.Services.AddScoped<ReportContext>();
 builder.Services.AddScoped<RetailECommerce.Services.Facades.AdminDashboardFacade>();
+builder.Services.AddSingleton<RetailECommerce.Services.Payment.IQrCodeDetector, RetailECommerce.Services.Payment.ZXingQrCodeDetector>();
 
 
 builder.Services.AddControllersWithViews();

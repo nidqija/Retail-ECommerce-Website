@@ -5,6 +5,7 @@ using RetailECommerce.Models;
 using RetailECommerce.Services.Discounts;
 using RetailECommerce.Services.Facades;
 using RetailECommerce.Services.Observers;
+using RetailECommerce.Services.Payment;
 
 namespace RetailECommerce.Controllers
 {
@@ -13,12 +14,14 @@ namespace RetailECommerce.Controllers
         private readonly CheckoutFacade _checkoutFacade;
         private readonly MyDbContext _context;
         private readonly IDiscountService _discountService;
+        private readonly IQrCodeDetector _qrCodeDetector;
 
-        public CheckoutController(MyDbContext context, IDiscountService discountService)
+        public CheckoutController(MyDbContext context, IDiscountService discountService, IQrCodeDetector qrCodeDetector)
         {
             _checkoutFacade = new CheckoutFacade();
             _context = context;
             _discountService = discountService;
+            _qrCodeDetector = qrCodeDetector;
         }
 
         private const string CartSessionKey = "ShoppingCart";
@@ -93,9 +96,32 @@ namespace RetailECommerce.Controllers
         }
 
         [HttpPost]
-        public IActionResult Process(string paymentType, decimal subtotal, string? discountCode)
+        public IActionResult Process(string paymentType, decimal subtotal, string? discountCode, IFormFile? qrProof)
         {
             LoadCartData();
+
+            // Mock QR payment verification: the checkout page scans the QR with
+            // the shopper's camera and submits the captured frame; we confirm
+            // server-side (ZXing) that a QR code really is in that frame.
+            // No QR found -> back to the checkout page so they can rescan.
+            if (paymentType?.ToLower() == "qr")
+            {
+                bool qrDetected = false;
+                if (qrProof != null && qrProof.Length > 0)
+                {
+                    using var stream = qrProof.OpenReadStream();
+                    qrDetected = _qrCodeDetector.ContainsQrCode(stream);
+                }
+
+                if (!qrDetected)
+                {
+                    ModelState.AddModelError("qrProof",
+                        qrProof == null || qrProof.Length == 0
+                            ? "Please scan your payment QR code with your camera to complete the payment."
+                            : "We couldn't verify the scanned QR code. Please try scanning again.");
+                    return View("Index");
+                }
+            }
 
             int userId = CurrentUserId;
             // Temporary reference used while processing payment; the real, saved
