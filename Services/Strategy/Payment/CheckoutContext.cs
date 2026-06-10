@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RetailECommerce.Services.Observers;
+using RetailECommerce.Services.State.Payment;
 
 namespace RetailECommerce.Services.Strategy.Payment
 {
@@ -136,22 +137,26 @@ namespace RetailECommerce.Services.Strategy.Payment
             // Calculate total with tax
             var total = CalculateTotal(subtotal);
 
-            // Execute payment
-            var paymentResult = _paymentStrategy.ProcessPayment(total);
+            var paymentLifecycle = new PaymentContext(_paymentStrategy, total);
 
-            // Update order state
-            if (paymentResult.IsSuccessful)
+            paymentLifecycle.Process();
+
+            var finalResult = paymentLifecycle.Result;
+
+            if ( finalResult != null && finalResult.IsSuccessful)
             {
                 _orderState.TransitionToPaymentSuccess();
-                NotifyPaymentSuccess(orderId, userId, paymentResult, cartItems ?? new());
+                Console.WriteLine("Payment successful. Transitioning to SuccessState.");
+                NotifyPaymentSuccess(orderId, userId, finalResult, cartItems ?? new Dictionary<string, object>());
             }
             else
             {
-                _orderState.TransitionToPaymentFailure(paymentResult.ErrorMessage);
-                NotifyPaymentFailure(orderId, userId, paymentResult, cartItems ?? new());
+                _orderState.TransitionToPaymentFailure(finalResult?.ErrorMessage ?? "Unknown error");
+                Console.WriteLine($"Payment failed: {finalResult?.ErrorMessage}");
+                NotifyPaymentFailure(orderId, userId, finalResult, cartItems ?? new Dictionary<string, object>());
             }
 
-            return paymentResult;
+            return finalResult;
         }
 
         /// <summary>
