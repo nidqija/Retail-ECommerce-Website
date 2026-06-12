@@ -75,24 +75,30 @@ public class AdminController : Controller
     [HttpPost]
     public IActionResult CreateProduct(Product product)
     {
-        AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Request received to create product. Name: '{product?.Name}', Price: {product?.Price}.");
-        if (ModelState.IsValid)
+        if (product == null)
         {
-            _productRepository.AddProduct(product!);
-
-        if (product.StockQuantity == 0)
-        {
-            AddVendorNotification(
-                $"Product out of stock: {product.Name}. Please update product stock.",
-                NotificationType.ProductOutOfStock
-            );
-            _context.SaveChanges();
+            return BadRequest();
         }
 
+        AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Request received to create product. Name: '{product.Name}', Price: {product.Price}.");
+
+        if (ModelState.IsValid)
+        {
+            _productRepository.AddProduct(product);
+
+            if (product.StockQuantity == 0)
+            {
+                AddVendorNotification(
+                    $"Product out of stock: {product.Name}. Please update product stock.",
+                    NotificationType.ProductOutOfStock
+                );
+                _context.SaveChanges();
+            }
 
             AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Product '{product.Name}' successfully created. Redirecting to Products list.");
             return RedirectToAction("Products");
         }
+
         AdminLogger.Instance.Log("AdminController.CreateProduct [POST]: ModelState is invalid. Reloading form with validation messages.");
         PageCreator pageCreator = new AdminCreateProductPageCreator();
         return pageCreator.RenderPage(this);
@@ -138,23 +144,17 @@ public class AdminController : Controller
 
         if (ModelState.IsValid)
         {
+            _productRepository.UpdateProduct(product);
 
-            if (product == null)
+            if (product.StockQuantity == 0)
             {
-                return BadRequest();
+                AddVendorNotification(
+                    $"Product out of stock: {product.Name}. Please update product stock.",
+                    NotificationType.ProductOutOfStock
+                );
+                _context.SaveChanges();
             }
-
-            _productRepository.UpdateProduct(product!);
-
-        if (product.StockQuantity == 0)
-        {
-            AddVendorNotification(
-                $"Product out of stock: {product.Name}. Please update product stock.",
-                NotificationType.ProductOutOfStock
-            );
-            _context.SaveChanges();
-        }
-            
+                
             AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Product ID: {id} successfully updated. Redirecting to Products list.");
             return RedirectToAction("Products");
         }
