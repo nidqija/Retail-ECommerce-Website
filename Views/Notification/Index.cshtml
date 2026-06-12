@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Notifications";
+    var notifications = (ViewBag.Notifications as IEnumerable<RetailECommerce.Models.Notification>)
+        ?? Enumerable.Empty<RetailECommerce.Models.Notification>();
+}
+
+<h1 class="mb-4">Notifications</h1>
+
+@if (!notifications.Any())
+{
+    <div class="alert alert-info">
+        You have no notifications yet.
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var notification in notifications)
+        {
+            <div class="list-group-item mb-2">
+                <div class="d-flex justify-content-between">
+                    <strong>@notification.Type</strong>
+                    <small class="text-muted">
+                        @notification.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                    </small>
+                </div>
+
+                <p class="mb-0">@notification.Message</p>
+            </div>
+        }
+    </div>
+}

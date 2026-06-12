@@ -25,6 +25,7 @@ namespace RetailECommerce.Controllers
         }
 
         private const string CartSessionKey = "ShoppingCart";
+        private const string SelectedCartSessionKey = "SelectedCartItems";
 
         // Resolve the logged-in shopper's id from their auth cookie / session.
         // Login (SignInController) stores the email as the Name claim and in the
@@ -68,10 +69,34 @@ namespace RetailECommerce.Controllers
             return JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new List<CartItem>();
         }
 
+        private void SaveCartItems(List<CartItem> cartItems)
+        {
+           var cartJson = JsonSerializer.Serialize(cartItems);
+           HttpContext.Session.SetString(CartSessionKey, cartJson);
+        }
+
+        private List<CartItem> GetSelectedCartItems()
+        {
+            var selectedJson = HttpContext.Session.GetString(SelectedCartSessionKey);
+
+            if (string.IsNullOrEmpty(selectedJson))
+            {
+                return GetCartItems();
+            }
+
+            return JsonSerializer.Deserialize<List<CartItem>>(selectedJson) ?? new List<CartItem>();
+        }
+
+        private void SaveSelectedCartItems(List<CartItem> selectedItems)
+        {
+            var selectedJson = JsonSerializer.Serialize(selectedItems);
+            HttpContext.Session.SetString(SelectedCartSessionKey, selectedJson);
+        }
+
         private void LoadCartData()
         {
             // Pull the real cart the shopper built (stored in session by CartController).
-            var cartItems = GetCartItems();
+            var cartItems = GetSelectedCartItems();
             ViewBag.OrderItems = cartItems;
 
             decimal subtotal = cartItems.Sum(i => i.Price * i.Quantity);
@@ -93,6 +118,33 @@ namespace RetailECommerce.Controllers
         {
             LoadCartData();
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Index(List<int> selectedProductIds)
+        {
+            var cartItems = GetCartItems();
+
+            if (selectedProductIds == null || !selectedProductIds.Any())
+            {
+                TempData["CartMessage"] = "Please select at least one product to checkout.";
+                return RedirectToAction("Index", "Cart");
+            }
+
+            var selectedItems = cartItems
+                .Where(i => selectedProductIds.Contains(i.ProductId))
+                .ToList();
+
+            if (!selectedItems.Any())
+            {
+                TempData["CartMessage"] = "Selected products are not found in your cart.";
+                return RedirectToAction("Index", "Cart");
+            }
+
+            SaveSelectedCartItems(selectedItems);
+
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -137,11 +189,14 @@ namespace RetailECommerce.Controllers
 
             // The shopper's actual cart, used both for payment notifications and
             // for the order line items we persist.
-            var cart = GetCartItems();
+            var cart = GetSelectedCartItems();
             var cartItems = cart.ToDictionary(i => i.Name, i => (object)i.Price);
 
+
+            var selectedPaymentType = paymentType ?? "cod";
+
             var checkoutResult = _checkoutFacade.ProcessCheckout(
-                paymentType,
+                selectedPaymentType,
                 payableSubtotal,
                 orderId,
                 userId,
@@ -153,7 +208,7 @@ namespace RetailECommerce.Controllers
             string paymentStatus;
             string orderStatus;
 
-            if (paymentType?.ToLower() == "cod")
+            if (selectedPaymentType?.ToLower() == "cod")
             {
                 paymentStatus = "Pending";
                 orderStatus = "Pending";
@@ -182,7 +237,7 @@ namespace RetailECommerce.Controllers
                     TotalAmount = checkoutResult.TotalAmount,
                     Subtotal = discountResult.OriginalSubtotal,
                     Tax = tax,
-                    PaymentMethod = FriendlyPaymentName(paymentType),
+                    PaymentMethod = FriendlyPaymentName(selectedPaymentType),
                     OrderStatus = orderStatus,
                     OrderItems = cart.Select(c => new OrderItem
                     {
@@ -203,8 +258,15 @@ namespace RetailECommerce.Controllers
                     _discountService.RecordDiscountUsed(userId, discountResult.Discount.Id);
                 }
 
-                // The order is placed - empty the shopping cart.
-                HttpContext.Session.Remove(CartSessionKey);
+                // The order is placed - remove only the selected checkout items from cart.
+                var fullCart = GetCartItems();
+
+                fullCart = fullCart
+                    .Where(item => !cart.Any(selected => selected.ProductId == item.ProductId))
+                    .ToList();
+
+                SaveCartItems(fullCart);
+                HttpContext.Session.Remove(SelectedCartSessionKey);
             }
 
             // Use the real saved order id in messaging when we have one.
@@ -238,7 +300,7 @@ namespace RetailECommerce.Controllers
             ViewBag.Message = checkoutResult.GetDisplayMessage();
             ViewBag.TransactionId = checkoutResult.GetTransactionId();
             ViewBag.OrderStatus = paymentStatus;
-            ViewBag.PaymentType = paymentType;
+            ViewBag.PaymentType = selectedPaymentType;
             ViewBag.PaymentNotification = notificationMessage;
 
             // Receipt figures, reflecting the discount cut-off.

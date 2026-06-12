@@ -13,11 +13,13 @@ public class ReviewController : Controller
 {
 
     private readonly IReviewRepository _reviewRepository;
+    private readonly MyDbContext _context;
 
 
-    public ReviewController(IReviewRepository reviewRepository)
+    public ReviewController(IReviewRepository reviewRepository,MyDbContext context)
     {
         _reviewRepository = reviewRepository;
+        _context = context;
     }
     
 
@@ -53,6 +55,17 @@ public class ReviewController : Controller
             existingReview.Status = "Replied";
 
             _reviewRepository.UpdateReview(existingReview);
+
+            _context.Notifications.Add(new Notification
+            {
+                UserId = existingReview.UserId,
+                Message = $"Vendor replied to your feedback for Product #{existingReview.ProductId}.",
+                Type = NotificationType.SystemAlert,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            _context.SaveChanges();
+
             return RedirectToAction("Index");
         }
 
