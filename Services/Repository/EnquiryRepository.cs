@@ -49,12 +49,38 @@ public class EnquiryRepository : IEnquiryRepository
         }
     }
 
+
+    public void VendorUpdateEnquiry(Enquiry enquiry)
+    {
+        var existingEnquiry = _context.Enquiries.Include(e => e.User).Include(e => e.Product).FirstOrDefault(e => e.EnquiryId == enquiry.EnquiryId);
+        if (existingEnquiry != null)
+        {
+            existingEnquiry.ReplyMessage = enquiry.ReplyMessage;
+            existingEnquiry.Status = enquiry.Status;
+           
+            _context.SaveChanges();
+            Console.WriteLine($"Enquiry with ID {enquiry.EnquiryId} updated successfully with this reply message : {enquiry.ReplyMessage}");
+        }
+    }
+
     public void DeleteEnquiry(int id)
     {
         var enquiry = _context.Enquiries.Include(e => e.User).Include(e => e.Product).FirstOrDefault(e => e.EnquiryId == id);
         if (enquiry != null)
         {
             _context.Enquiries.Remove(enquiry);
+            _context.SaveChanges();
+        }
+    }
+
+
+    public void DeleteEnquiryReply(int id)
+    {
+        var enquiry = _context.Enquiries.Include(e => e.User).Include(e => e.Product).FirstOrDefault(e => e.EnquiryId == id);
+        if (enquiry != null)
+        {
+            enquiry.ReplyMessage = "";
+            enquiry.Status = "Pending";
             _context.SaveChanges();
         }
     }

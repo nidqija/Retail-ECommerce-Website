@@ -93,6 +93,72 @@ public class EnquiryController : Controller
      }
 
 
+
+     [HttpPost]
+     public IActionResult VendorUpdateEnquiry(Enquiry enquiry)
+     {
+         var existingEnquiry = _enquiryRepository.GetEnquiryById(enquiry.EnquiryId);
+
+         if (existingEnquiry == null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            // 5. CLIENT USAGE ( STATE MANAGER USAGE )
+            // create the state manager with the existing enquiry and submit the response through the state manager
+            var stateManager = new EnquiryStateManager(existingEnquiry);
+
+            // submit the response through the state manager which will handle the state transition 
+            // and update the enquiry status accordingly
+            stateManager.VendorSubmitResponse(enquiry.ReplyMessage);
+
+             // update the enquiry in the repository with the new reply message and status
+            _enquiryRepository.VendorUpdateEnquiry(existingEnquiry);
+
+            TempData["SuccessMessage"] = $"Enquiry with ID {enquiry.EnquiryId} updated successfully.";
+
+            return RedirectToAction("Details", "Products", new { id = existingEnquiry.ProductId, tab = "questions" });
+
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error updating enquiry: {ex.Message}";
+            return RedirectToAction("Details", "Products", new { id = existingEnquiry.ProductId, tab = "questions" });
+        }
+
+        }
+
+     
+      [HttpPost]
+      public IActionResult DeleteEnquiryReply(int enquiryId)
+    {
+        var existingEnquiry = _enquiryRepository.GetEnquiryById(enquiryId);
+
+        if (existingEnquiry == null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            _enquiryRepository.DeleteEnquiryReply(enquiryId);
+
+            TempData["SuccessMessage"] = $"Enquiry reply with ID {enquiryId} deleted successfully.";
+
+            return RedirectToAction("Details", "Products", new { id = existingEnquiry.ProductId, tab = "questions" });
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error deleting enquiry reply: {ex.Message}";
+            return RedirectToAction("Details", "Products", new { id = existingEnquiry.ProductId, tab = "questions" });
+        }
+    }
+
+
+
+
      [HttpPost]
      public IActionResult CloseEnquiry(int enquiryId)
     {
