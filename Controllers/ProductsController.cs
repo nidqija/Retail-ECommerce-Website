@@ -6,6 +6,7 @@ using RetailECommerce.Data;
 using RetailECommerce.ViewModels;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
+using System.Security.Claims;
 
 
 public class ProductsController : Controller
@@ -27,6 +28,24 @@ public ProductsController(
     _enquiryRepository = enquiryRepository;
     _reviewRepository = reviewRepository;
     _context = context;
+}
+
+private int GetCurrentUserId()
+{
+    var email = User.FindFirstValue(ClaimTypes.Name)
+                ?? HttpContext.Session.GetString("UserEmail");
+
+    if (!string.IsNullOrEmpty(email))
+    {
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+
+        if (user != null)
+        {
+            return user.UserId;
+        }
+    }
+
+    return 1;
 }
 
     // GET: /Products  — product catalog grid
@@ -129,7 +148,7 @@ public ProductsController(
             return RedirectToAction("Details", new { id = model.ProductId });
         }
 
-        int userId = 1;
+        int userId = GetCurrentUserId();
 
         var review = new Review
         {
