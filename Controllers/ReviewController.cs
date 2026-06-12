@@ -61,6 +61,9 @@ public class ReviewController : Controller
                 UserId = existingReview.UserId,
                 Message = $"Vendor replied to your feedback for Product #{existingReview.ProductId}.",
                 Type = NotificationType.SystemAlert,
+                ProductId = existingReview.ProductId,
+                Tab = "feedback",
+                IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
 

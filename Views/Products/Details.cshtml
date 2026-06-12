@@ -368,7 +368,7 @@ else
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
 
-                                                            <form asp-controller="Enquiry" asp-action="UpdateEnquiry" method="POST">
+                                                            <form asp-controller="Enquiry" asp-action="VendorUpdateEnquiry" method="POST">
                                                                 @Html.AntiForgeryToken()
                                                                 <div class="modal-body text-start">
                                                                     <input type="hidden" name="EnquiryId" value="@enquiry.EnquiryId" />

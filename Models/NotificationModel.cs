@@ -26,4 +26,8 @@ public class Notification
     public int? ProductId { get; set; }
 
     public string? Tab { get; set; }
+
+    public int? OrderId { get; set; }
+
+    public bool IsRead { get; set; } = false;
 }

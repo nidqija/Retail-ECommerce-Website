@@ -286,6 +286,8 @@ namespace RetailECommerce.Controllers
                 UserId = userId,
                 Message = notificationMessage,
                 Type = NotificationType.PaymentUpdate,
+                OrderId = savedOrderId,
+                IsRead = false,
                 CreatedAt = DateTime.UtcNow
             };
 

@@ -141,6 +141,9 @@ public class EnquiryController : Controller
                 UserId = existingEnquiry.UserId,
                 Message = $"Vendor replied to your enquiry for Product #{existingEnquiry.ProductId}.",
                 Type = NotificationType.SystemAlert,
+                ProductId = existingEnquiry.ProductId,
+                Tab = "questions",
+                IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
 
