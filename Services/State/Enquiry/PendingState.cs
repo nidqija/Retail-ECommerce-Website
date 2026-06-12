@@ -22,4 +22,12 @@ public class PendingState : IEnquireState
     {
         Console.WriteLine("Cannot close an enquiry that is still pending. Please submit a response first.");
     }
+
+    public void VendorSubmitResponse(EnquiryStateManager manager, string replyMessage)
+    {
+        manager.Enquiry.ReplyMessage = replyMessage;
+        manager.TransitionToState(new RepliedState());
+
+        Console.WriteLine($"Enquiry with ID {manager.Enquiry.EnquiryId} has been replied with this message : {replyMessage}");
+    } 
 }

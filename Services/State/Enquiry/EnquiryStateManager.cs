@@ -47,6 +47,12 @@ public class EnquiryStateManager
         CurrentState.CloseEnquiry(this);
     }
 
+
+    public void VendorSubmitResponse(string replyMessage)
+    {
+        CurrentState.VendorSubmitResponse(this, replyMessage);
+    }
+
     
 
     

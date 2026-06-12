@@ -16,4 +16,11 @@ public class RepliedState : IEnquireState
     {
         manager.TransitionToState(new ClosedState());
     }
+
+
+    public void VendorSubmitResponse(EnquiryStateManager manager, string replyMessage)
+    {
+        manager.Enquiry.ReplyMessage = replyMessage;
+        manager.TransitionToState(new RepliedState());
+    }
 }

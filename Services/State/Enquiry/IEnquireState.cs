@@ -13,5 +13,7 @@ public interface IEnquireState
 
     void CloseEnquiry(EnquiryStateManager manager);
 
+    void VendorSubmitResponse(EnquiryStateManager manager, string replyMessage);
+
 
 }

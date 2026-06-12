@@ -137,20 +137,25 @@ namespace RetailECommerce.Services.Strategy.Payment
             // Calculate total with tax
             var total = CalculateTotal(subtotal);
 
+            // process payment using state pattern
             var paymentLifecycle = new PaymentContext(_paymentStrategy, total);
 
+            // process payment and update order state based on result
             paymentLifecycle.Process();
 
+            // Get the final payment result and update order state accordingly
             var finalResult = paymentLifecycle.Result;
 
             if ( finalResult != null && finalResult.IsSuccessful)
             {
+                // Transition to success state
                 _orderState.TransitionToPaymentSuccess();
                 Console.WriteLine("Payment successful. Transitioning to SuccessState.");
                 NotifyPaymentSuccess(orderId, userId, finalResult, cartItems ?? new Dictionary<string, object>());
             }
             else
             {
+                // Transition to failure state
                 _orderState.TransitionToPaymentFailure(finalResult?.ErrorMessage ?? "Unknown error");
                 Console.WriteLine($"Payment failed: {finalResult?.ErrorMessage}");
                 NotifyPaymentFailure(orderId, userId, finalResult, cartItems ?? new Dictionary<string, object>());
