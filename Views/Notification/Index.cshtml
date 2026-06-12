@@ -18,9 +18,26 @@
         <div class="list-group">
             @foreach (var notification in notifications)
             {
-                var isPayment = notification.Type.ToString() == "PaymentUpdate";
-                var title = isPayment ? "Payment Update" : "Vendor Reply";
-                var buttonText = isPayment ? "View Order" : "View Reply";
+
+                var title = notification.Type switch
+                {
+                    RetailECommerce.Models.NotificationType.PaymentUpdate => "Payment Update",
+                    RetailECommerce.Models.NotificationType.NewOrderReceived => "New Order Received",
+                    RetailECommerce.Models.NotificationType.NewCustomerEnquiry => "New Customer Enquiry",
+                    RetailECommerce.Models.NotificationType.NewCustomerReview => "New Customer Review",
+                    RetailECommerce.Models.NotificationType.ProductOutOfStock => "Product Out of Stock",
+                    _ => "Vendor Reply"
+                };
+
+                var buttonText = notification.Type switch
+                {
+                    RetailECommerce.Models.NotificationType.PaymentUpdate => "View Order",
+                    RetailECommerce.Models.NotificationType.NewOrderReceived => "Go to Order Management",
+                    RetailECommerce.Models.NotificationType.NewCustomerEnquiry => "Go to Enquiry Management",
+                    RetailECommerce.Models.NotificationType.NewCustomerReview => "Go to Product Review Management",
+                    RetailECommerce.Models.NotificationType.ProductOutOfStock => "Go to Product Management",
+                    _ => "View Reply"
+                };             
 
                 <a asp-controller="Notification"
                    asp-action="Open"

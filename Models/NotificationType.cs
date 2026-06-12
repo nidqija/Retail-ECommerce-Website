@@ -4,5 +4,10 @@ public enum NotificationType
 {
     OrderUpdate,
     PaymentUpdate,
-    SystemAlert
+    SystemAlert,
+
+    NewOrderReceived,
+    NewCustomerEnquiry,
+    NewCustomerReview,
+    ProductOutOfStock
 }

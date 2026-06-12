@@ -93,6 +93,25 @@ namespace RetailECommerce.Controllers
             HttpContext.Session.SetString(SelectedCartSessionKey, selectedJson);
         }
 
+        private void AddVendorNotification(string message, NotificationType type)
+        {
+            var vendors = _context.Users
+                .Where(u => u.Role == UserRole.Vendor)
+                .ToList();
+
+            foreach (var vendor in vendors)
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    UserId = vendor.UserId,
+                    Message = message,
+                    Type = type,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+        }
+
         private void LoadCartData()
         {
             // Pull the real cart the shopper built (stored in session by CartController).
@@ -250,6 +269,12 @@ namespace RetailECommerce.Controllers
                 _context.Orders.Add(order);
                 _context.SaveChanges();
                 savedOrderId = order.Id;
+
+                AddVendorNotification(
+                    $"New order received. Order #{savedOrderId} is waiting for management.",
+                    NotificationType.NewOrderReceived
+                );
+                _context.SaveChanges();
 
                 // Order went through, so mark the discount as used by this user
                 // (shows as disabled next time they reach checkout).

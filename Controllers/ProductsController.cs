@@ -48,6 +48,27 @@ private int GetCurrentUserId()
     return 1;
 }
 
+private void AddVendorNotification(string message, NotificationType type)
+{
+    var vendors = _context.Users
+        .Where(u => u.Role == UserRole.Vendor)
+        .ToList();
+
+    foreach (var vendor in vendors)
+    {
+        _context.Notifications.Add(new Notification
+        {
+            UserId = vendor.UserId,
+            Message = message,
+            Type = type,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+}
+
+
+
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
     {
@@ -160,6 +181,12 @@ private int GetCurrentUserId()
         };
 
         _context.Reviews.Add(review);
+
+        AddVendorNotification(
+            $"New customer review received for Product #{model.ProductId}.",
+            NotificationType.NewCustomerReview
+        );
+
         _context.SaveChanges();
 
         TempData["ReviewMessage"] = "Your feedback and review has been submitted.";

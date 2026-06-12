@@ -39,6 +39,25 @@ public class EnquiryController : Controller
             return 1;
         }
 
+    private void AddVendorNotification(string message, NotificationType type)
+    {
+        var vendors = _context.Users
+            .Where(u => u.Role == UserRole.Vendor)
+            .ToList();
+
+        foreach (var vendor in vendors)
+        {
+            _context.Notifications.Add(new Notification
+            {
+                UserId = vendor.UserId,
+                Message = message,
+                Type = type,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
     public IActionResult Index()
     {
         var enquiries = _enquiryRepository.GetAllEnquiries();
@@ -69,6 +88,12 @@ public class EnquiryController : Controller
         };
 
         _enquiryRepository.AddEnquiry(enquiry);
+
+        AddVendorNotification(
+            $"New customer enquiry received for Product #{ProductId}.",
+            NotificationType.NewCustomerEnquiry
+        );
+        _context.SaveChanges();
 
         TempData["EnquiryMessage"] = "Question submitted!";
         return RedirectToAction("Details", "Products", new { id = ProductId, tab = "questions" });
