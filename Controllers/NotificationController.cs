@@ -67,6 +67,28 @@ namespace RetailECommerce.Controllers
             notification.IsRead = true;
             _context.SaveChanges();
 
+            var message = notification.Message.ToLower();
+
+            if (notification.Type == NotificationType.NewOrderReceived || message.Contains("new order received"))
+            {
+                return RedirectToAction("Orders", "Admin");
+            }
+
+            if (notification.Type == NotificationType.NewCustomerEnquiry || message.Contains("new customer enquiry"))
+            {
+                return RedirectToAction("Enquiries", "Admin");
+            }
+
+            if (notification.Type == NotificationType.NewCustomerReview || message.Contains("new customer review"))
+            {
+                return RedirectToAction("Index", "Review");
+            }
+
+            if (notification.Type == NotificationType.ProductOutOfStock || message.Contains("out of stock"))
+            {
+                return RedirectToAction("Products", "Admin");
+            }
+
             if (notification.Type == NotificationType.PaymentUpdate)
             {
                 int? orderId = notification.OrderId;
@@ -97,7 +119,7 @@ namespace RetailECommerce.Controllers
                     {
                         productId = int.Parse(match.Groups[1].Value);
                     }
-                }   
+                }
 
                 var tab = notification.Tab;
 
@@ -115,7 +137,8 @@ namespace RetailECommerce.Controllers
                     });
                 }
             }
+
             return RedirectToAction("Index");
-        } 
+        }
     }
 }
