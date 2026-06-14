@@ -11,13 +11,16 @@ public class AdminController : Controller
 {
     private readonly MyDbContext _context;
     private readonly IProductRepository _productRepository;
+    private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly RetailECommerce.Services.Facades.AdminDashboardFacade _dashboardFacade;
 
-    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade)
+    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade , IWebHostEnvironment webHostEnvironment)
     {
         _context = context;
         _productRepository = productRepository;
         _dashboardFacade = dashboardFacade;
+        _webHostEnvironment = webHostEnvironment;
+
         AdminLogger.Instance.Log("AdminController constructor: Initialized with dependencies.");
     }
     // GET: /Admin  — Admin hub / overview
@@ -53,11 +56,38 @@ public class AdminController : Controller
 
     // POST: /Admin/CreateProduct
     [HttpPost]
-    public IActionResult CreateProduct(Product product)
+    public IActionResult CreateProduct(Product product , IFormFile ImageFile)
     {
+        var errors = ModelState.Values.SelectMany(v => v.Errors);
         AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Request received to create product. Name: '{product?.Name}', Price: {product?.Price}.");
+        if (product == null)
+        {
+            AdminLogger.Instance.Log("AdminController.CreateProduct [POST]: Product payload was null. Returning BadRequest.");
+            return BadRequest();
+        }
+
         if (ModelState.IsValid)
         {
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    ImageFile.CopyTo(fileStream);
+                }
+
+                product.ImageUrl = "/uploads/" + uniqueFileName;
+                AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Image uploaded successfully. File path: '{product.ImageUrl}'.");
+            }
+
             _productRepository.AddProduct(product);
             AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Product '{product.Name}' successfully created. Redirecting to Products list.");
             return RedirectToAction("Products");
@@ -96,13 +126,39 @@ public class AdminController : Controller
 
     // POST: /Admin/EditProduct/{id}
     [HttpPost]
-    public IActionResult EditProduct(int id, Product product)
+    public IActionResult EditProduct(int id, Product product, IFormFile? ImageFile)
     {
         AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Request received to update product ID: {id}. Name: '{product?.Name}', Price: {product?.Price}.");
+        if (product == null)
+        {
+            AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Product payload was null for route ID: {id}. Returning BadRequest.");
+            return BadRequest();
+        }
+
         if (id != product.ProductId)
         {
             AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: ID mismatch. Route ID: {id}, Product ID: {product?.ProductId}. Returning 400 BadRequest.");
             return BadRequest();
+        }
+
+        if (ImageFile != null && ImageFile.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                ImageFile.CopyTo(fileStream);
+            }
+
+            product.ImageUrl = "/uploads/" + uniqueFileName;
+            AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Image uploaded successfully. File path: '{product.ImageUrl}'.");
         }
 
         if (ModelState.IsValid)

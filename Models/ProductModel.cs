@@ -29,6 +29,9 @@ public class Product
     [MaxLength(50)]
     public string SubCategory { get; set; } = "General";
 
+    [MaxLength(200)]
+    public string ImageUrl { get; set; } = string.Empty;
+
 
 
     // create a property to link products to enquiries
