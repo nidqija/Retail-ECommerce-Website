@@ -6,6 +6,7 @@ using RetailECommerce.Data;
 using RetailECommerce.ViewModels;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
+using System.Security.Claims;
 
 
 public class ProductsController : Controller
@@ -28,6 +29,45 @@ public ProductsController(
     _reviewRepository = reviewRepository;
     _context = context;
 }
+
+private int GetCurrentUserId()
+{
+    var email = User.FindFirstValue(ClaimTypes.Name)
+                ?? HttpContext.Session.GetString("UserEmail");
+
+    if (!string.IsNullOrEmpty(email))
+    {
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+
+        if (user != null)
+        {
+            return user.UserId;
+        }
+    }
+
+    return 1;
+}
+
+private void AddVendorNotification(string message, NotificationType type)
+{
+    var vendors = _context.Users
+        .Where(u => u.Role == UserRole.Vendor)
+        .ToList();
+
+    foreach (var vendor in vendors)
+    {
+        _context.Notifications.Add(new Notification
+        {
+            UserId = vendor.UserId,
+            Message = message,
+            Type = type,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+}
+
+
 
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
@@ -129,7 +169,7 @@ public ProductsController(
             return RedirectToAction("Details", new { id = model.ProductId });
         }
 
-        int userId = 1;
+        int userId = GetCurrentUserId();
 
         var review = new Review
         {
@@ -141,6 +181,12 @@ public ProductsController(
         };
 
         _context.Reviews.Add(review);
+
+        AddVendorNotification(
+            $"New customer review received for Product #{model.ProductId}.",
+            NotificationType.NewCustomerReview
+        );
+
         _context.SaveChanges();
 
         TempData["ReviewMessage"] = "Your feedback and review has been submitted.";

@@ -7,3 +7,5 @@ admin_logs.txt
 # SQLite runtime working files - machine-local, never commit
 *.db-shm
 *.db-wal
+
+.vscode

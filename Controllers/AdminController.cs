@@ -23,6 +23,26 @@ public class AdminController : Controller
 
         AdminLogger.Instance.Log("AdminController constructor: Initialized with dependencies.");
     }
+
+    private void AddVendorNotification(string message, NotificationType type)
+    {
+        var vendors = _context.Users
+            .Where(u => u.Role == UserRole.Vendor)
+            .ToList();
+
+        foreach (var vendor in vendors)
+        {
+            _context.Notifications.Add(new Notification
+            {
+                UserId = vendor.UserId,
+                Message = message,
+                Type = type,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
     // GET: /Admin  — Admin hub / overview
     public IActionResult Index()
     {
@@ -66,6 +86,13 @@ public class AdminController : Controller
             return BadRequest();
         }
 
+        if (product == null)
+        {
+            return BadRequest();
+        }
+
+        AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Request received to create product. Name: '{product.Name}', Price: {product.Price}.");
+
         if (ModelState.IsValid)
         {
             if (ImageFile != null && ImageFile.Length > 0)
@@ -89,9 +116,20 @@ public class AdminController : Controller
             }
 
             _productRepository.AddProduct(product);
+
+            if (product.StockQuantity == 0)
+            {
+                AddVendorNotification(
+                    $"Product out of stock: {product.Name}. Please update product stock.",
+                    NotificationType.ProductOutOfStock
+                );
+                _context.SaveChanges();
+            }
+
             AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Product '{product.Name}' successfully created. Redirecting to Products list.");
             return RedirectToAction("Products");
         }
+
         AdminLogger.Instance.Log("AdminController.CreateProduct [POST]: ModelState is invalid. Reloading form with validation messages.");
         PageCreator pageCreator = new AdminCreateProductPageCreator();
         return pageCreator.RenderPage(this);
@@ -136,6 +174,7 @@ public class AdminController : Controller
         }
 
         if (id != product.ProductId)
+        if (product == null || id != product.ProductId)
         {
             AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: ID mismatch. Route ID: {id}, Product ID: {product?.ProductId}. Returning 400 BadRequest.");
             return BadRequest();
@@ -164,6 +203,16 @@ public class AdminController : Controller
         if (ModelState.IsValid)
         {
             _productRepository.UpdateProduct(product);
+
+            if (product.StockQuantity == 0)
+            {
+                AddVendorNotification(
+                    $"Product out of stock: {product.Name}. Please update product stock.",
+                    NotificationType.ProductOutOfStock
+                );
+                _context.SaveChanges();
+            }
+                
             AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Product ID: {id} successfully updated. Redirecting to Products list.");
             return RedirectToAction("Products");
         }

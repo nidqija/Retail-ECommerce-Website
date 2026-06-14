@@ -159,6 +159,14 @@ else
 
                                     <p class="text-muted small mb-0">@review.Comment</p>
 
+                                    @if (!User.IsInRole("Vendor") && !string.IsNullOrEmpty(review.VendorReply))
+                                    {
+                                        <div class="mt-2 p-3 bg-light rounded border-start border-success border-3">
+                                            <span class="fw-bold text-success small">Vendor Response</span>
+                                            <p class="mb-0 text-dark small fst-italic">@review.VendorReply</p>
+                                        </div>
+                                    }
+
                                     @if (User.IsInRole("Vendor"))
                                     {
                                         <div class="mt-2">
@@ -360,7 +368,7 @@ else
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
 
-                                                            <form asp-controller="Enquiry" asp-action="UpdateEnquiry" method="POST">
+                                                            <form asp-controller="Enquiry" asp-action="VendorUpdateEnquiry" method="POST">
                                                                 @Html.AntiForgeryToken()
                                                                 <div class="modal-body text-start">
                                                                     <input type="hidden" name="EnquiryId" value="@enquiry.EnquiryId" />
