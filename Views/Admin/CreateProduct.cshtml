@@ -9,7 +9,7 @@
 
 <div class="card shadow-sm" style="max-width: 680px;">
     <div class="card-body">
-        <form asp-controller="Admin" asp-action="CreateProduct" method="post">
+        <form asp-controller="Admin" asp-action="CreateProduct" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label class="form-label fw-semibold" for="Name">Product Name</label>
                 <input type="text" id="Name" name="Name" class="form-control"
@@ -48,6 +48,11 @@
                 <label class="form-label fw-semibold" for="StockQuantity">Stock Quantity</label>
                 <input type="number" id="StockQuantity" name="StockQuantity" class="form-control"
                        placeholder="0" min="0" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold" for="imageFile">Product Image</label>
+                <input type="file" id="ImageUrl" name="ImageFile" class="form-control" accept="image/*" required />
             </div>
 
             <div class="d-flex gap-2">

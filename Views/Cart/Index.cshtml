@@ -20,9 +20,17 @@
 }
 else
 {
+    <form id="checkoutForm" asp-controller="Checkout" asp-action="Index" method="post">
+        @Html.AntiForgeryToken()
+    </form>
+
     <table class="table align-middle">
         <thead class="table-light">
             <tr>
+                <th>
+                    <input type="checkbox" id="selectAll" />
+                    Select All
+                </th>
                 <th>Product</th>
                 <th class="text-center">Qty</th>
                 <th class="text-end">Unit Price</th>
@@ -35,14 +43,32 @@ else
             @foreach (var item in items)
             {
                 <tr>
+                    <td>
+                        <input type="checkbox"
+                               class="product-checkbox"
+                               name="selectedProductIds"
+                               value="@item.ProductId"
+                               form="checkoutForm"
+                               checked />
+                    </td>
+
                     <td>@item.Name</td>
 
                     <td class="text-center">
-                        <form asp-controller="Cart" asp-action="UpdateCart" method="post">
+                        <form asp-controller="Cart" asp-action="UpdateCart" method="post" class="d-inline-flex gap-2 justify-content-center">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@item.ProductId" />
-                            <input type="number" name="quantity" value="@item.Quantity" min="1" style="width:70px;" />
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+
+                            <input type="number"
+                                   name="quantity"
+                                   value="@item.Quantity"
+                                   min="1"
+                                   class="form-control form-control-sm"
+                                   style="width:80px;" />
+
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                Update
+                            </button>
                         </form>
                     </td>
 
@@ -53,7 +79,9 @@ else
                         <form asp-controller="Cart" asp-action="DeleteFromCart" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@item.ProductId" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </button>
                         </form>
                     </td>
                 </tr>
@@ -63,6 +91,45 @@ else
 
     <div class="text-end">
         <h4>Subtotal: $@subtotal.ToString("0.00")</h4>
-        <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary">Proceed to Checkout</a>
+
+        <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">
+            Continue Shopping
+        </a>
+
+        <button type="submit" form="checkoutForm" class="btn btn-primary">
+            Proceed to Checkout
+        </button>
     </div>
 }
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const selectAll = document.getElementById("selectAll");
+    const checkboxes = document.querySelectorAll(".product-checkbox");
+
+    function updateSelectAllStatus() {
+        const allChecked = Array.from(checkboxes).every(function (checkbox) {
+            return checkbox.checked;
+        });
+
+        selectAll.checked = allChecked;
+    }
+
+    // On page load, automatically check Select All if every product is selected.
+    updateSelectAllStatus();
+
+    // Toggle all product checkboxes when Select All is clicked.
+    selectAll.addEventListener("change", function () {
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = selectAll.checked;
+        });
+    });
+
+    // Update Select All whenever an individual product checkbox changes.
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
+            updateSelectAllStatus();
+        });
+    });
+});
+</script>

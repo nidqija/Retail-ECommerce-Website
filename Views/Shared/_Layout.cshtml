@@ -44,6 +44,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Storefront</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Notification" asp-action="Index">Notifications</a>
+                            </li>
                         }
                         else
                         {
@@ -67,6 +70,10 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Orders">My Orders</a>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Notification" asp-action="Index">Notifications</a>
+                                    </li>
                                 }
                                 <li class="nav-item" >
                                     <a class="nav-link text-dark" asp-area="" data-bs-toggle="modal" data-bs-target="#myAccountModalDialog" >My Account</a>
@@ -86,7 +93,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="SignUp" asp-action="Index">Sign Up</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="SignIn" asp-action="Index">Sign In</a>
+                                <a class="nav-link text-dark" asp-area="" asp-route-ReturnUrl="@Context.Request.Query["ReturnUrl"]" asp-controller="SignIn" asp-action="Index">Sign In</a>
                             </li>
                         }
                         

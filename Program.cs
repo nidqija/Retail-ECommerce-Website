@@ -5,17 +5,18 @@ using RetailECommerce.Data;
 using RetailECommerce.Services.Strategy.Report;
 using QuestPDF.Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-
+// 1. Configure Database Context
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlite(connectionString));
 
-// register the services in the dependency injection container to be used in the controllers
+// 2. Register Application Services (Dependency Injection)
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IEnquiryRepository, EnquiryRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
@@ -28,59 +29,52 @@ builder.Services.AddScoped<ReportContext>();
 builder.Services.AddScoped<RetailECommerce.Services.Facades.AdminDashboardFacade>();
 builder.Services.AddSingleton<RetailECommerce.Services.Payment.IQrCodeDetector, RetailECommerce.Services.Payment.ZXingQrCodeDetector>();
 
-
 builder.Services.AddControllersWithViews();
-builder.Services.AddDistributedMemoryCache(); // Required for Session
+
+// 3. Configure Session & Cache
+// NOTE: AddDistributedMemoryCache stores sessions in volatile server memory. 
+// Restarting the application automatically destroys all active session data.
+builder.Services.AddDistributedMemoryCache(); 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // How long the user stays logged in
-    options.Cookie.HttpOnly = true; // Security: prevents JS from reading the cookie
-    options.Cookie.IsEssential = true; // Required to work even if the user hasn't accepted cookies
-
-   
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
+    options.Cookie.HttpOnly = true;                 
+    options.Cookie.IsEssential = true;             
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie( options =>
-{
-    options.Cookie.Name = "MyCookieAuth";
-    options.LoginPath = "/SignIn/Index"; // Redirect to this path if not authenticated
-    options.AccessDeniedPath = "/SignIn/Index"; // Redirect to this path if access is denied
-});
-
+// 4. Configure Authentication Cookie
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "MyCookieAuth";
+        options.LoginPath = "/SignIn/Index";       
+        options.AccessDeniedPath = "/SignIn/Index"; 
+    });
 
 var app = builder.Build();
 
-
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseRouting();
-app.UseSession(); // Enable session middleware
-
-app.UseAuthentication(); // Enable authentication middleware
-app.UseAuthorization();
-
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
-
-// seed the database with a default admin user if no users exist
+// ==========================================
+// STARTUP TASKS (Cache Cleanup & DB Seeding)
+// ==========================================
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     
+    // Optional: Explicit Cache Access on Boot
     try
     {
-        // seed the database with a default admin user if no users exist
+        var cache = services.GetService<IDistributedCache>();
+        // If you migrate to a persistent cache (Redis/SQL) later, 
+        // you would run explicit removal keys or flush commands here.
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while inspecting the cache: {ex.Message}");
+    }
+
+    // Seed the database with default records if empty
+    try
+    {
         var context = services.GetRequiredService<MyDbContext>();
 
         await DataSeeder.SeedAdminAsync(context);
@@ -90,14 +84,35 @@ using (var scope = app.Services.CreateScope())
         await DataSeeder.SeedReviewAsync(context);
         await DataSeeder.SeedOrderAsync(context);
         await DataSeeder.SeedDiscountAsync(context);
-    
-        
-        
     }
     catch (Exception ex)
     {
         Console.WriteLine($"An error occurred while seeding the database: {ex.Message}");
     }
 }
+
+// ==========================================
+// MIDDLEWARE PIPELINE
+// ==========================================
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseRouting();
+
+// Middleware Order is critical: Session -> Authentication -> Authorization
+app.UseSession();        
+app.UseAuthentication(); 
+app.UseAuthorization();
+
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.Run();

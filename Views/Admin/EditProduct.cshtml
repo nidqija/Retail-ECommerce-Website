@@ -16,8 +16,9 @@ else
 {
     <div class="card shadow-sm" style="max-width: 680px;">
         <div class="card-body">
-            <form asp-controller="Admin" asp-action="EditProduct" asp-route-id="@p.ProductId" method="post">
+            <form asp-controller="Admin" asp-action="EditProduct" asp-route-id="@p.ProductId" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="ProductId" value="@p.ProductId" />
+                <input type="hidden" name="ImageUrl" value="@p.ImageUrl" />
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="Name">Product Name</label>
                     <input type="text" id="Name" name="Name" class="form-control"
@@ -50,6 +51,15 @@ else
                         <input type="text" id="SubCategory" name="SubCategory" class="form-control"
                                value="@p.SubCategory" placeholder="e.g. Technology" required />
                     </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="ImageFile">Product Image</label>
+                    <input type="file" id="ImageFile" name="ImageFile" class="form-control" accept="image/*" />
+                    @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                    {
+                        <div class="form-text">Current image: @p.ImageUrl</div>
+                    }
                 </div>
 
                 <div class="mb-4">

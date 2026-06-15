@@ -58,7 +58,7 @@ public class DataSeeder
         {
             var products = new List<Product>
             {
-                new Product { Name = "Red Shirt", Description = "A comfortable red shirt", Price = 19.99m, StockQuantity = 10 },
+                new Product { Name = "Red Shirt", Description = "A comfortable red shirt", Price = 19.99m, StockQuantity = 10  },
                 new Product { Name = "Blue Jeans", Description = "Stylish blue jeans", Price = 49.99m, StockQuantity = 20 },
                 new Product { Name = "Black Shoes", Description = "Elegant black shoes", Price = 79.99m, StockQuantity = 15 },
                 new Product { Name = "White Hat", Description = "Simple white hat", Price = 14.99m, StockQuantity = 12 }

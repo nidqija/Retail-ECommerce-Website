@@ -6,6 +6,9 @@ using RetailECommerce.Data;
 using RetailECommerce.ViewModels;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+
 
 
 public class ProductsController : Controller
@@ -14,6 +17,8 @@ public class ProductsController : Controller
     private IProductRepository _productRepository;
     private IEnquiryRepository _enquiryRepository;
 
+    private IUserService _userService;
+
 private readonly MyDbContext _context;
 private readonly IReviewRepository _reviewRepository;
 
@@ -21,13 +26,54 @@ public ProductsController(
     IProductRepository productRepository,
     IEnquiryRepository enquiryRepository,
     IReviewRepository reviewRepository,
+    IUserService userService,
     MyDbContext context)
 {
     _productRepository = productRepository;
     _enquiryRepository = enquiryRepository;
     _reviewRepository = reviewRepository;
     _context = context;
+    _userService = userService;
 }
+
+private int GetCurrentUserId()
+{
+    var email = User.FindFirstValue(ClaimTypes.Name)
+                ?? HttpContext.Session.GetString("UserEmail");
+
+    if (!string.IsNullOrEmpty(email))
+    {
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+
+        if (user != null)
+        {
+            return user.UserId;
+        }
+    }
+
+    return 1;
+}
+
+private void AddVendorNotification(string message, NotificationType type)
+{
+    var vendors = _context.Users
+        .Where(u => u.Role == UserRole.Vendor)
+        .ToList();
+
+    foreach (var vendor in vendors)
+    {
+        _context.Notifications.Add(new Notification
+        {
+            UserId = vendor.UserId,
+            Message = message,
+            Type = type,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+}
+
+
 
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
@@ -42,6 +88,7 @@ public ProductsController(
         // Apply search filter by keyword
         if (!string.IsNullOrEmpty(searchKeyword))
         {
+            
             products = products.Where(p =>
                 p.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase)
@@ -85,9 +132,19 @@ public ProductsController(
     }
 
     // GET: /Products/Details/{id}
-    //[Authorize] // only authenticated users can access the product details page
     public IActionResult Details(int id)
     {
+
+       var user = HttpContext.Session.GetString("UserEmail");
+       if (string.IsNullOrEmpty(user))
+         {
+              TempData["ErrorMessage"] = "You must be signed in to view product details.";
+              return RedirectToAction("Index", "SignIn", new { ReturnUrl = Url.Action("Details", new { id }) });
+        }
+        
+
+        
+            
         // Mock: return a product matching the id, or a fallback
 
         // update : replace the mock data with the data from the database using the repository pattern
@@ -106,6 +163,7 @@ public ProductsController(
 
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
+        
     }
 
     
@@ -120,7 +178,7 @@ public ProductsController(
             return RedirectToAction("Details", new { id = model.ProductId });
         }
 
-        int userId = 1;
+        int userId = GetCurrentUserId();
 
         var review = new Review
         {
@@ -132,6 +190,12 @@ public ProductsController(
         };
 
         _context.Reviews.Add(review);
+
+        AddVendorNotification(
+            $"New customer review received for Product #{model.ProductId}.",
+            NotificationType.NewCustomerReview
+        );
+
         _context.SaveChanges();
 
         TempData["ReviewMessage"] = "Your feedback and review has been submitted.";

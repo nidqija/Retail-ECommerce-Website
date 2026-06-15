@@ -11,15 +11,38 @@ public class AdminController : Controller
 {
     private readonly MyDbContext _context;
     private readonly IProductRepository _productRepository;
+    private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly RetailECommerce.Services.Facades.AdminDashboardFacade _dashboardFacade;
 
-    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade)
+    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade , IWebHostEnvironment webHostEnvironment)
     {
         _context = context;
         _productRepository = productRepository;
         _dashboardFacade = dashboardFacade;
+        _webHostEnvironment = webHostEnvironment;
+
         AdminLogger.Instance.Log("AdminController constructor: Initialized with dependencies.");
     }
+
+    private void AddVendorNotification(string message, NotificationType type)
+    {
+        var vendors = _context.Users
+            .Where(u => u.Role == UserRole.Vendor)
+            .ToList();
+
+        foreach (var vendor in vendors)
+        {
+            _context.Notifications.Add(new Notification
+            {
+                UserId = vendor.UserId,
+                Message = message,
+                Type = type,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
     // GET: /Admin  — Admin hub / overview
     public IActionResult Index()
     {
@@ -53,15 +76,60 @@ public class AdminController : Controller
 
     // POST: /Admin/CreateProduct
     [HttpPost]
-    public IActionResult CreateProduct(Product product)
+    public IActionResult CreateProduct(Product product , IFormFile ImageFile)
     {
+        var errors = ModelState.Values.SelectMany(v => v.Errors);
         AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Request received to create product. Name: '{product?.Name}', Price: {product?.Price}.");
+        if (product == null)
+        {
+            AdminLogger.Instance.Log("AdminController.CreateProduct [POST]: Product payload was null. Returning BadRequest.");
+            return BadRequest();
+        }
+
+        if (product == null)
+        {
+            return BadRequest();
+        }
+
+        AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Request received to create product. Name: '{product.Name}', Price: {product.Price}.");
+
         if (ModelState.IsValid)
         {
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    ImageFile.CopyTo(fileStream);
+                }
+
+                product.ImageUrl = "/uploads/" + uniqueFileName;
+                AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Image uploaded successfully. File path: '{product.ImageUrl}'.");
+            }
+
             _productRepository.AddProduct(product);
+
+            if (product.StockQuantity == 0)
+            {
+                AddVendorNotification(
+                    $"Product out of stock: {product.Name}. Please update product stock.",
+                    NotificationType.ProductOutOfStock
+                );
+                _context.SaveChanges();
+            }
+
             AdminLogger.Instance.Log($"AdminController.CreateProduct [POST]: Product '{product.Name}' successfully created. Redirecting to Products list.");
             return RedirectToAction("Products");
         }
+
         AdminLogger.Instance.Log("AdminController.CreateProduct [POST]: ModelState is invalid. Reloading form with validation messages.");
         PageCreator pageCreator = new AdminCreateProductPageCreator();
         return pageCreator.RenderPage(this);
@@ -96,18 +164,55 @@ public class AdminController : Controller
 
     // POST: /Admin/EditProduct/{id}
     [HttpPost]
-    public IActionResult EditProduct(int id, Product product)
+    public IActionResult EditProduct(int id, Product product, IFormFile? ImageFile)
     {
         AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Request received to update product ID: {id}. Name: '{product?.Name}', Price: {product?.Price}.");
+        if (product == null)
+        {
+            AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Product payload was null for route ID: {id}. Returning BadRequest.");
+            return BadRequest();
+        }
+
         if (id != product.ProductId)
+        if (product == null || id != product.ProductId)
         {
             AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: ID mismatch. Route ID: {id}, Product ID: {product?.ProductId}. Returning 400 BadRequest.");
             return BadRequest();
         }
 
+        if (ImageFile != null && ImageFile.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                ImageFile.CopyTo(fileStream);
+            }
+
+            product.ImageUrl = "/uploads/" + uniqueFileName;
+            AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Image uploaded successfully. File path: '{product.ImageUrl}'.");
+        }
+
         if (ModelState.IsValid)
         {
             _productRepository.UpdateProduct(product);
+
+            if (product.StockQuantity == 0)
+            {
+                AddVendorNotification(
+                    $"Product out of stock: {product.Name}. Please update product stock.",
+                    NotificationType.ProductOutOfStock
+                );
+                _context.SaveChanges();
+            }
+                
             AdminLogger.Instance.Log($"AdminController.EditProduct [POST]: Product ID: {id} successfully updated. Redirecting to Products list.");
             return RedirectToAction("Products");
         }

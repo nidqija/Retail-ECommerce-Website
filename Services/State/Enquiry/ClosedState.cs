@@ -16,4 +16,9 @@ public class ClosedState : IEnquireState
     {
         Console.WriteLine("This enquiry is already closed.");
     }
+
+    public void VendorSubmitResponse(EnquiryStateManager manager, string replyMessage)
+    {
+        Console.WriteLine("Cannot submit a response to a closed enquiry. Please reopen the enquiry if you want to submit a new response.");
+    }
 }
