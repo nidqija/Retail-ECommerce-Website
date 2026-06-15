@@ -127,8 +127,10 @@ private void AddVendorNotification(string message, NotificationType type)
         ViewBag.SearchKeyword = searchKeyword;
         ViewBag.SelectedCategory = category;
         ViewBag.SelectedSubCategory = subCategory;
+
         PageCreator pageCreator = new ProductsIndexPageCreator();
         return pageCreator.RenderPage(this);
+        
     }
 
     // GET: /Products/Details/{id}
@@ -143,9 +145,6 @@ private void AddVendorNotification(string message, NotificationType type)
         }
         
 
-        
-            
-        // Mock: return a product matching the id, or a fallback
 
         // update : replace the mock data with the data from the database using the repository pattern
         var productbyId = _productRepository.GetProductById(id);

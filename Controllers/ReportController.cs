@@ -58,13 +58,17 @@ public class ReportController : Controller
           
             ReportData data = reportData.MapData(reportParameters);
             var activeStrategy = _reportStrategies.FirstOrDefault(s => s.reportType.Equals(reportType, StringComparison.OrdinalIgnoreCase));
+            
 
             if (activeStrategy == null)
             {
                 return BadRequest("Invalid report type.");
             }
 
-            byte[] reportBytes = activeStrategy.generateReport(data);   
+           // client 
+            ReportContext reportContext = new ReportContext(activeStrategy);
+
+            byte[] reportBytes = reportContext.GenerateReport(data);   
 
             GetContentType(reportType);          
 

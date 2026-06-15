@@ -8,6 +8,7 @@ public interface IPageHandler
     IActionResult Render(Controller controller);
 }
 
+
 // Concrete Product: The Home Page logic
 public class IndexPageHandler : IPageHandler
 {
