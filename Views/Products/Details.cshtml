@@ -4,6 +4,7 @@
     var enquiries = ViewBag.Enquiries as List<RetailECommerce.Models.Enquiry>;
     var reviews = ViewBag.Reviews as List<RetailECommerce.Models.Review> ?? new List<RetailECommerce.Models.Review>();
     var isQuestionsTab = Context.Request.Query["tab"] == "questions";
+
 }
 
 @if (p == null)
