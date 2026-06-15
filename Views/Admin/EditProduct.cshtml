@@ -39,6 +39,19 @@ else
                               rows="4" required>@p.Description</textarea>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold" for="Category">Category</label>
+                        <input type="text" id="Category" name="Category" class="form-control"
+                               value="@p.Category" placeholder="e.g. Computers & Accessories" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold" for="SubCategory">Sub-Category</label>
+                        <input type="text" id="SubCategory" name="SubCategory" class="form-control"
+                               value="@p.SubCategory" placeholder="e.g. Technology" required />
+                    </div>
+                </div>
+
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="StockQuantity">Stock Quantity</label>
                     <input type="number" id="StockQuantity" name="StockQuantity" class="form-control"
