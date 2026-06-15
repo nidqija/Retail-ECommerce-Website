@@ -78,19 +78,12 @@ private void AddVendorNotification(string message, NotificationType type)
     // GET: /Products  — product catalog grid
     public IActionResult Index(string searchKeyword = "", string category = "", string subCategory = "")
     {
-        // Hardcoded mock products; replace with IProductRepository call later
-        var products = new List<Product>
-        {
-            new Product { ProductId = 1, Name = "Mechanical Keyboard",  Description = "Tactile switches, full RGB backlight, detachable cable.",   Price = 89.99m,  StockQuantity = 42, Category = "Computers & Accessories", SubCategory = "Technology"},
-            new Product { ProductId = 2, Name = "Wireless Mouse",       Description = "Ergonomic shape, 3000 DPI, silent clicks.",                 Price = 39.99m,  StockQuantity = 78, Category = "Computers & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 3, Name = "Madrid shirt signed by Messi",   Description = "\"Authentic\" jersey signed by Lionel Messi.",     Price = 9.99m,  StockQuantity = 5,  Category = "Men Clothes", SubCategory = "Apparel" },
-            new Product { ProductId = 4, Name = "Basic dress",          Description = "Basic dress for everyday wear.",                             Price = 19.99m,  StockQuantity = 5,  Category = "Women Clothes", SubCategory = "Apparel" },
-            new Product { ProductId = 5, Name = "4K Monitor",           Description = "32-inch 4K display, 60Hz refresh rate, USB-C connectivity.", Price = 399.99m, StockQuantity = 12, Category = "Computers & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 6, Name = "Playstation 10 (PSX)",  Description = "Latest gaming console with enhanced graphics.",              Price = 2499.99m,  StockQuantity = 35, Category = "Gaming & Consoles", SubCategory = "Entertainment" },
-            new Product { ProductId = 7, Name = "Iphone 9999",          Description = "The latest model, iphone 9999 that can cure all diseases.",  Price = 9999.99m,  StockQuantity = 10, Category = "Mobile & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 8, Name = "Bluetooth Speaker",    Description = "Portable speaker with deep bass and 12-hour battery life.",   Price = 59.99m,  StockQuantity = 25, Category = "Audio & Headphones", SubCategory = "Technology" },
-            new Product { ProductId = 9, Name = "Sport Shoes",             Description = "Comfortable shoes for sports activities.",        Price = 29.99m,  StockQuantity = 50, Category = "Sports & Outdoors", SubCategory = "Apparel" },
-        };
+        // Real catalog from the database (via the repository). Every product
+        // shown here therefore exists in the DB, so View Details / Add to Cart
+        // for it will always resolve.
+        var allProducts = _productRepository.GetAllProducts().ToList();
+
+        var products = allProducts;
 
         // Apply search filter by keyword
         if (!string.IsNullOrEmpty(searchKeyword))
@@ -114,21 +107,19 @@ private void AddVendorNotification(string message, NotificationType type)
             products = products.Where(p => p.SubCategory.Equals(subCategory, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        var allCategories = new List<Product>
-        {
-            new Product { ProductId = 1, Name = "Mechanical Keyboard",  Description = "Tactile switches, full RGB backlight, detachable cable.",   Price = 89.99m,  StockQuantity = 42, Category = "Computers & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 2, Name = "Wireless Mouse",       Description = "Ergonomic shape, 3000 DPI, silent clicks.",                 Price = 39.99m,  StockQuantity = 78, Category = "Computers & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 3, Name = "Madrid shirt signed by Messi",   Description = "\"Authentic\" jersey signed by Lionel Messi.",     Price = 9.99m,  StockQuantity = 5,  Category = "Men Clothes", SubCategory = "Apparel" },
-            new Product { ProductId = 4, Name = "Basic dress",          Description = "Basic dress for everyday wear.",                             Price = 19.99m,  StockQuantity = 5,  Category = "Women Clothes", SubCategory = "Apparel" },
-            new Product { ProductId = 5, Name = "4K Monitor",           Description = "32-inch 4K display, 60Hz refresh rate, USB-C connectivity.", Price = 399.99m, StockQuantity = 12, Category = "Computers & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 6, Name = "Playstation 10 (PSX)",  Description = "Latest gaming console with enhanced graphics.",              Price = 2499.99m,  StockQuantity = 35, Category = "Gaming & Consoles", SubCategory = "Entertainment" },
-            new Product { ProductId = 7, Name = "Iphone 9999",          Description = "The latest model, iphone 9999 that can cure all diseases.",        Price = 9999.99m,  StockQuantity = 10, Category = "Mobile & Accessories", SubCategory = "Technology" },
-            new Product { ProductId = 8, Name = "Bluetooth Speaker",    Description = "Portable speaker with deep bass and 12-hour battery life.",   Price = 59.99m,  StockQuantity = 25, Category = "Audio & Headphones", SubCategory = "Technology" },
-            new Product { ProductId = 9, Name = "Sport Shoes",             Description = "Comfortable shoes for sports activities.",        Price = 29.99m,  StockQuantity = 50, Category = "Sports & Outdoors", SubCategory = "Apparel" },
-        };
-
-        var categories = allCategories.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
-        var subCategories = allCategories.Select(p => p.SubCategory).Distinct().OrderBy(sc => sc).ToList();
+        // Filter options are derived from the full (unfiltered) catalog.
+        var categories = allProducts
+            .Select(p => p.Category)
+            .Where(c => !string.IsNullOrEmpty(c))
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+        var subCategories = allProducts
+            .Select(p => p.SubCategory)
+            .Where(sc => !string.IsNullOrEmpty(sc))
+            .Distinct()
+            .OrderBy(sc => sc)
+            .ToList();
 
         ViewBag.Products = products;
         ViewBag.Categories = categories;
