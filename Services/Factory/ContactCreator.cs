@@ -2,7 +2,9 @@ namespace RetailECommerce.Services.Factory;
 using Microsoft.AspNetCore.Mvc;
 
 
-
+// this is concrete creator class that implements the factory method to create specific page handlers
+// this is the second step in the factory pattern, 
+//where we create concrete creator classes that implement the factory method to create specific page handlers
 public class HomePageCreator : PageCreator
 {
     public override IPageHandler CreatePageHandler()
