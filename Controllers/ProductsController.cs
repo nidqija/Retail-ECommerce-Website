@@ -7,6 +7,8 @@ using RetailECommerce.ViewModels;
 using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+
 
 
 public class ProductsController : Controller
@@ -15,6 +17,8 @@ public class ProductsController : Controller
     private IProductRepository _productRepository;
     private IEnquiryRepository _enquiryRepository;
 
+    private IUserService _userService;
+
 private readonly MyDbContext _context;
 private readonly IReviewRepository _reviewRepository;
 
@@ -22,12 +26,14 @@ public ProductsController(
     IProductRepository productRepository,
     IEnquiryRepository enquiryRepository,
     IReviewRepository reviewRepository,
+    IUserService userService,
     MyDbContext context)
 {
     _productRepository = productRepository;
     _enquiryRepository = enquiryRepository;
     _reviewRepository = reviewRepository;
     _context = context;
+    _userService = userService;
 }
 
 private int GetCurrentUserId()
@@ -89,6 +95,7 @@ private void AddVendorNotification(string message, NotificationType type)
         // Apply search filter by keyword
         if (!string.IsNullOrEmpty(searchKeyword))
         {
+            
             products = products.Where(p =>
                 p.Name.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase)
@@ -134,9 +141,19 @@ private void AddVendorNotification(string message, NotificationType type)
     }
 
     // GET: /Products/Details/{id}
-    //[Authorize] // only authenticated users can access the product details page
     public IActionResult Details(int id)
     {
+
+       var user = HttpContext.Session.GetString("UserEmail");
+       if (string.IsNullOrEmpty(user))
+         {
+              TempData["ErrorMessage"] = "You must be signed in to view product details.";
+              return RedirectToAction("Index", "SignIn", new { ReturnUrl = Url.Action("Details", new { id }) });
+        }
+        
+
+        
+            
         // Mock: return a product matching the id, or a fallback
 
         // update : replace the mock data with the data from the database using the repository pattern
@@ -155,6 +172,7 @@ private void AddVendorNotification(string message, NotificationType type)
 
         PageCreator pageCreator = new ProductsDetailsPageCreator();
         return pageCreator.RenderPage(this);
+        
     }
 
     

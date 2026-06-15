@@ -17,10 +17,10 @@ public class SignInController : Controller
             _userService = userService;
     } 
 
-    public IActionResult Index(string ? returnurl = null) 
+    public IActionResult Index(string ? ReturnUrl = null) 
     {
 
-        if (!string.IsNullOrEmpty(returnurl))
+        if (!string.IsNullOrEmpty(ReturnUrl))
         {
             ViewBag.ShowError = true;
             ViewBag.ErrorMessage = "You must be signed in to access that page.";
@@ -28,7 +28,7 @@ public class SignInController : Controller
             ViewBag.ShowError = false;
         }
 
-        ViewBag.ReturnUrl = returnurl; 
+        ViewBag.ReturnUrl = ReturnUrl; 
 
         // One line: Logic and View selection happen in the Factory folder
         PageCreator pageCreator = new SignInPageCreator();
@@ -39,16 +39,18 @@ public class SignInController : Controller
     // only use task and async when you have to do something that takes time, 
     // like database access or calling an external API
     [HttpPost]
-    public async Task<IActionResult> Authenticate(string email , string password)
+    public async Task<IActionResult> Authenticate(string email , string password , string ? ReturnUrl = null)
     {
+  
+
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
             ModelState.AddModelError("", "Email and password are required.");
-            return View("Index");
+            return Index(ReturnUrl); // FIX: Routes back through Index logic to preserve Factory UI setup safely
         } else if (!ModelState.IsValid)
         {
             ModelState.AddModelError("", "Invalid input. Please check your email and password.");
-            return View("Index");
+            return Index(ReturnUrl); // FIX: Routes back through Index logic to preserve Factory UI setup safely
         }
 
         var user = await _userService.AuthenticateUserAsync(email, password);
@@ -74,17 +76,22 @@ public class SignInController : Controller
             // async method to sign in the user and create an authentication cookie that will be sent to the client
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
+
+            if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+            {
+                return Redirect(ReturnUrl);
+            }
+
+            // Fallback tracking defaults if no prior target was registered
+            if (user.Role == UserRole.Vendor)
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+
             Console.WriteLine("User authenticated successfully.");
             Console.WriteLine("User Password: " + user.Password);
             Console.WriteLine("User Full Name: " + user.FullName);
 
-            if (user.Role == UserRole.Vendor)
-            {
-                // this calls the Index() method of the AdminController to render the admin dashboard
-                // "Admin" is the name of the controller, "Index" is the name of the action method
-                return RedirectToAction("Index", "Admin");
-            }
-             
             
             return RedirectToAction("Index", "Home");
         }
@@ -92,8 +99,8 @@ public class SignInController : Controller
         {
             Console.WriteLine("Authentication failed. Invalid email or password.");
             ModelState.AddModelError("", "Invalid email or password. Please try again.");
-            return View("Index");
-        }
+            return Index(ReturnUrl); // FIX: Routes back through Index logic to preserve Factory UI setup safely}
+    }
     }
 
 
