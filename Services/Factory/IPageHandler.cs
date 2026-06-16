@@ -192,3 +192,12 @@ public class DiscountsPageHandler : IPageHandler
         return controller.View("~/Views/Admin/Discount.cshtml");
     }
 }
+
+
+public class NewPasswordPageHandler : IPageHandler
+{
+    public IActionResult Render(Controller controller)
+    {
+        return controller.View("~/Views/Account/NewPassword.cshtml");
+    }
+}

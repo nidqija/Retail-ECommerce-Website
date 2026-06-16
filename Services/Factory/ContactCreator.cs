@@ -178,3 +178,12 @@ public class DiscountsPageCreator : PageCreator
         return new DiscountsPageHandler();
     }
 }
+
+
+public class NewPasswordPageCreator : PageCreator
+{
+    public override IPageHandler CreatePageHandler()
+    {
+        return new NewPasswordPageHandler();
+    }
+}
