@@ -15,13 +15,21 @@ namespace RetailECommerce.Controllers
         private readonly MyDbContext _context;
         private readonly IDiscountService _discountService;
         private readonly IQrCodeDetector _qrCodeDetector;
+        private readonly NotificationSubject _notificationSubject;
+        private readonly AdminNotificationObserver _adminNotificationObserver;
+        private readonly CustomerNotificationObserver _customerNotificationObserver;
 
-        public CheckoutController(MyDbContext context, IDiscountService discountService, IQrCodeDetector qrCodeDetector)
+        public CheckoutController(MyDbContext context, IDiscountService discountService, IQrCodeDetector qrCodeDetector, NotificationSubject notificationSubject,
+        AdminNotificationObserver adminNotificationObserver, CustomerNotificationObserver customerNotificationObserver)
         {
             _checkoutFacade = new CheckoutFacade();
             _context = context;
             _discountService = discountService;
             _qrCodeDetector = qrCodeDetector;
+
+            _notificationSubject = notificationSubject;
+            _adminNotificationObserver = adminNotificationObserver;
+            _customerNotificationObserver = customerNotificationObserver;
         }
 
         private const string CartSessionKey = "ShoppingCart";
@@ -91,25 +99,6 @@ namespace RetailECommerce.Controllers
         {
             var selectedJson = JsonSerializer.Serialize(selectedItems);
             HttpContext.Session.SetString(SelectedCartSessionKey, selectedJson);
-        }
-
-        private void AddVendorNotification(string message, NotificationType type)
-        {
-            var vendors = _context.Users
-                .Where(u => u.Role == UserRole.Vendor)
-                .ToList();
-
-            foreach (var vendor in vendors)
-            {
-                _context.Notifications.Add(new Notification
-                {
-                    UserId = vendor.UserId,
-                    Message = message,
-                    Type = type,
-                    IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                });
-            }
         }
 
         private void LoadCartData()
@@ -270,10 +259,14 @@ namespace RetailECommerce.Controllers
                 _context.SaveChanges();
                 savedOrderId = order.Id;
 
-                AddVendorNotification(
-                    $"New order received. Order #{savedOrderId} is waiting for management.",
-                    NotificationType.NewOrderReceived
-                );
+                _notificationSubject.Attach(_adminNotificationObserver);
+                _notificationSubject.Notify(new NotificationEventData
+                {
+                    Message = $"New order received. Order #{savedOrderId} is waiting for management.",
+                    Type = NotificationType.NewOrderReceived,
+                    OrderId = savedOrderId
+                });
+
                 _context.SaveChanges();
 
                 // Order went through, so mark the discount as used by this user
@@ -306,17 +299,15 @@ namespace RetailECommerce.Controllers
                     $"Payment failed. Order was not placed. Reason: {checkoutResult.Message}"
             };
 
-            var notification = new Notification
+            _notificationSubject.Attach(_customerNotificationObserver);
+            _notificationSubject.Notify(new NotificationEventData
             {
-                UserId = userId,
+                TargetUserId = userId,
                 Message = notificationMessage,
                 Type = NotificationType.PaymentUpdate,
-                OrderId = savedOrderId,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            };
+                OrderId = savedOrderId
+            });
 
-            _context.Notifications.Add(notification);
             _context.SaveChanges();
 
             ViewBag.PaymentStatus = paymentStatus;
