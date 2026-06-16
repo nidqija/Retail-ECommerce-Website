@@ -64,7 +64,7 @@ namespace RetailECommerce.Services.Strategy.Payment
     /// <summary>
     /// Enhanced checkout context with observer support and order state management.
     /// </summary>
-    public class CheckoutContext
+    public class CheckoutContext: IPaymentSubject
     {
         private IPaymentStrategy? _paymentStrategy;
         private ITaxCalculator? _taxCalculator;
@@ -161,7 +161,14 @@ namespace RetailECommerce.Services.Strategy.Payment
                 NotifyPaymentFailure(orderId, userId, finalResult, cartItems ?? new Dictionary<string, object>());
             }
 
-            return finalResult;
+            return finalResult ?? new PaymentResult
+            {
+                IsSuccessful = false,
+                Amount = total,
+                PaymentMethod = _paymentStrategy.GetType().Name,
+                ExecutedAt = DateTime.UtcNow,
+                ErrorMessage = "Unknown error"
+            };
         }
 
         /// <summary>
@@ -189,16 +196,16 @@ namespace RetailECommerce.Services.Strategy.Payment
         /// <summary>
         /// Notify all observers of failed payment.
         /// </summary>
-        private void NotifyPaymentFailure(int orderId, int userId, PaymentResult result, Dictionary<string, object> cartItems)
+        private void NotifyPaymentFailure(int orderId, int userId, PaymentResult? result, Dictionary<string, object> cartItems)
         {
             var eventData = new PaymentEventData
             {
                 OrderId = orderId,
                 UserId = userId,
-                Amount = result.Amount,
-                PaymentMethod = result.PaymentMethod,
-                ExecutedAt = result.ExecutedAt,
-                ErrorMessage = result.ErrorMessage,
+                Amount = result?.Amount ?? 0,
+                PaymentMethod = result?.PaymentMethod ?? string.Empty,
+                ExecutedAt = result?.ExecutedAt ?? DateTime.UtcNow,
+                ErrorMessage = result?.ErrorMessage ?? "Unknown error",
                 CartItems = cartItems
             };
 
