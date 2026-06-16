@@ -95,7 +95,7 @@ namespace RetailECommerce.Controllers
 
                 if (!orderId.HasValue)
                 {
-                    var match = Regex.Match(notification.Message, @"Order #(\d+)");
+                    var match = Regex.Match(notification.Message, @"order #(\d+)", RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
                         orderId = int.Parse(match.Groups[1].Value);
@@ -114,7 +114,7 @@ namespace RetailECommerce.Controllers
 
                 if (!productId.HasValue)
                 {
-                    var match = Regex.Match(notification.Message, @"Product #(\d+)");
+                    var match = Regex.Match(notification.Message, @"product #(\d+)", RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
                         productId = int.Parse(match.Groups[1].Value);

@@ -6,6 +6,7 @@ using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 using RetailECommerce.Services.Logging;
 using RetailECommerce.Services.State.Order;
+using RetailECommerce.Services.Observers;
 
 public class AdminController : Controller
 {
@@ -13,35 +14,22 @@ public class AdminController : Controller
     private readonly IProductRepository _productRepository;
     private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly RetailECommerce.Services.Facades.AdminDashboardFacade _dashboardFacade;
+    private readonly NotificationSubject _notificationSubject;
+    private readonly AdminNotificationObserver _adminNotificationObserver;
 
-    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade , IWebHostEnvironment webHostEnvironment)
+    public AdminController(MyDbContext context, IProductRepository productRepository, RetailECommerce.Services.Facades.AdminDashboardFacade dashboardFacade , IWebHostEnvironment webHostEnvironment,NotificationSubject notificationSubject,
+    AdminNotificationObserver adminNotificationObserver)
     {
         _context = context;
         _productRepository = productRepository;
         _dashboardFacade = dashboardFacade;
         _webHostEnvironment = webHostEnvironment;
+        _notificationSubject = notificationSubject;
+        _adminNotificationObserver = adminNotificationObserver;
 
         AdminLogger.Instance.Log("AdminController constructor: Initialized with dependencies.");
     }
 
-    private void AddVendorNotification(string message, NotificationType type)
-    {
-        var vendors = _context.Users
-            .Where(u => u.Role == UserRole.Vendor)
-            .ToList();
-
-        foreach (var vendor in vendors)
-        {
-            _context.Notifications.Add(new Notification
-            {
-                UserId = vendor.UserId,
-                Message = message,
-                Type = type,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
-    }
 
     // GET: /Admin  — Admin hub / overview
     public IActionResult Index()
@@ -119,10 +107,14 @@ public class AdminController : Controller
 
             if (product.StockQuantity == 0)
             {
-                AddVendorNotification(
-                    $"Product out of stock: {product.Name}. Please update product stock.",
-                    NotificationType.ProductOutOfStock
-                );
+                _notificationSubject.Attach(_adminNotificationObserver);
+                _notificationSubject.Notify(new NotificationEventData
+                {
+                    Message = $"Product out of stock: {product.Name}. Please update product stock.",
+                    Type = NotificationType.ProductOutOfStock,
+                    ProductId = product.ProductId
+                });
+
                 _context.SaveChanges();
             }
 
@@ -206,10 +198,14 @@ public class AdminController : Controller
 
             if (product.StockQuantity == 0)
             {
-                AddVendorNotification(
-                    $"Product out of stock: {product.Name}. Please update product stock.",
-                    NotificationType.ProductOutOfStock
-                );
+                _notificationSubject.Attach(_adminNotificationObserver);
+                _notificationSubject.Notify(new NotificationEventData
+                {
+                    Message = $"Product out of stock: {product.Name}. Please update product stock.",
+                    Type = NotificationType.ProductOutOfStock,
+                    ProductId = product.ProductId
+                });
+
                 _context.SaveChanges();
             }
                 

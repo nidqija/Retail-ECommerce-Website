@@ -8,6 +8,7 @@ using RetailECommerce.Services.Factory;
 using RetailECommerce.Services.Repository;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using RetailECommerce.Services.Observers;
 
 
 
@@ -21,19 +22,25 @@ public class ProductsController : Controller
 
 private readonly MyDbContext _context;
 private readonly IReviewRepository _reviewRepository;
+private readonly NotificationSubject _notificationSubject;
+private readonly AdminNotificationObserver _adminNotificationObserver;
 
 public ProductsController(
     IProductRepository productRepository,
     IEnquiryRepository enquiryRepository,
     IReviewRepository reviewRepository,
     IUserService userService,
-    MyDbContext context)
+    MyDbContext context,
+    NotificationSubject notificationSubject,
+    AdminNotificationObserver adminNotificationObserver)
 {
     _productRepository = productRepository;
     _enquiryRepository = enquiryRepository;
     _reviewRepository = reviewRepository;
     _context = context;
     _userService = userService;
+    _notificationSubject = notificationSubject;
+    _adminNotificationObserver = adminNotificationObserver;
 }
 
 private int GetCurrentUserId()
@@ -54,24 +61,7 @@ private int GetCurrentUserId()
     return 1;
 }
 
-private void AddVendorNotification(string message, NotificationType type)
-{
-    var vendors = _context.Users
-        .Where(u => u.Role == UserRole.Vendor)
-        .ToList();
 
-    foreach (var vendor in vendors)
-    {
-        _context.Notifications.Add(new Notification
-        {
-            UserId = vendor.UserId,
-            Message = message,
-            Type = type,
-            IsRead = false,
-            CreatedAt = DateTime.UtcNow
-        });
-    }
-}
 
 
 
@@ -190,10 +180,14 @@ private void AddVendorNotification(string message, NotificationType type)
 
         _context.Reviews.Add(review);
 
-        AddVendorNotification(
-            $"New customer review received for Product #{model.ProductId}.",
-            NotificationType.NewCustomerReview
-        );
+        _notificationSubject.Attach(_adminNotificationObserver);
+        _notificationSubject.Notify(new NotificationEventData
+        {
+            Message = $"New customer review received for Product #{model.ProductId}.",
+            Type = NotificationType.NewCustomerReview,
+            ProductId = model.ProductId,
+            Tab = "feedback"
+        });
 
         _context.SaveChanges();
 
