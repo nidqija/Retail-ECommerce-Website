@@ -4,15 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RetailECommerce.Models;
 using RetailECommerce.Services.Factory;
+using RetailECommerce.Services.Repository;
 
 
 public class AccountController : Controller
 {
     private readonly MyDbContext _context;
+    private readonly IAccountRepository _accountRepository;
 
-    public AccountController(MyDbContext context)
+    public AccountController(MyDbContext context , IAccountRepository accountRepository)
     {
         _context = context;
+        _accountRepository = accountRepository;
     }
 
     // Resolve the logged-in user's id from their auth cookie / session,
@@ -115,5 +118,37 @@ public class AccountController : Controller
     {
         HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
+    }
+
+
+    public IActionResult NewPassword()
+    {
+        PageCreator pageCreator = new NewPasswordPageCreator();
+        return pageCreator.RenderPage(this);
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult ChangePassword(string newPassword , string email)
+    {
+        
+        if (string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(email))
+        {
+            ModelState.AddModelError(string.Empty, "Email and new password are required.");
+            return View("NewPassword");
+        }
+
+        try 
+        {
+            _accountRepository.ChangePassword(newPassword, email);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View("NewPassword");
+        }
+
+        return RedirectToAction("Index", "SignIn");
     }
 }

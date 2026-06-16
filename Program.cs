@@ -25,6 +25,7 @@ builder.Services.AddScoped<RetailECommerce.Services.Discounts.IDiscountService, 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReportStrategy, PDFReportStrategy>();
 builder.Services.AddScoped<IReportStrategy, CSVReportStrategy>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ReportContext>();
 builder.Services.AddScoped<RetailECommerce.Services.Facades.AdminDashboardFacade>();
 builder.Services.AddScoped<RetailECommerce.Services.Observers.NotificationSubject>();
