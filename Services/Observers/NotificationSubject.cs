@@ -1,6 +1,6 @@
 namespace RetailECommerce.Services.Observers;
 
-public class NotificationSubject
+public class NotificationSubject: INotificationSubject
 {
     private readonly List<INotificationObserver> _observers = new();
 
