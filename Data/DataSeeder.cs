@@ -58,10 +58,10 @@ public class DataSeeder
         {
             var products = new List<Product>
             {
-                new Product { Name = "Red Shirt", Description = "A comfortable red shirt", Price = 19.99m, StockQuantity = 10  },
-                new Product { Name = "Blue Jeans", Description = "Stylish blue jeans", Price = 49.99m, StockQuantity = 20 },
-                new Product { Name = "Black Shoes", Description = "Elegant black shoes", Price = 79.99m, StockQuantity = 15 },
-                new Product { Name = "White Hat", Description = "Simple white hat", Price = 14.99m, StockQuantity = 12 }
+                new Product { Name = "Red Shirt", Description = "A comfortable red shirt", Price = 19.99m, StockQuantity = 10 , ImageUrl="https://contents.mediadecathlon.com/p2606947/k$1c9e0ffdefc3e67bdeabc82be7893e93/men-s-running-breathable-t-shirt-kiprun-run-100-dry-red-decathlon-8771124.jpg" },
+                new Product { Name = "Blue Jeans", Description = "Stylish blue jeans", Price = 49.99m, StockQuantity = 20 , ImageUrl = "https://levi.com.my/cdn/shop/files/levis-blue-tab-womens-column-jeans_A58880011_4_CM_DA_4c91770f-b563-488b-ba56-1501855dea08_3558X2000.progressive.jpg?v=1761720969"},
+                new Product { Name = "Black Shoes", Description = "Elegant black shoes", Price = 79.99m, StockQuantity = 15 , ImageUrl = "https://www.thejacketmaker.my/cdn/shop/products/01_Professor_Oxford_Black_Leather_Shoes_Front_Tilted-2-1674261796520_60495991-804b-41f3-a1d2-407ae54c86dc.webp?v=1756909998" },
+                new Product { Name = "White Hat", Description = "Simple white hat", Price = 14.99m, StockQuantity = 12 , ImageUrl = "https://vandrebrand.com/cdn/shop/files/VandrePremiumBaseballHat-01206.jpg?v=1752242892&width=1159"   }
             };
 
             context.Products.AddRange(products);
@@ -105,7 +105,10 @@ public class DataSeeder
             {
                 new Enquiry { UserId = 1, ProductId = 1, Message = "Is this product available in size M?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now },
                 new Enquiry { UserId = 1, ProductId = 2, Message = "What is the warranty period for this product?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-1) },
-                new Enquiry { UserId = 1, ProductId = 3, Message = "Can I return this product if it doesn't fit?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-2) }
+                new Enquiry { UserId = 1, ProductId = 3, Message = "Can I return this product if it doesn't fit?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-2) },
+                new Enquiry { UserId = 1, ProductId = 4, Message = "Is there a discount available for this product?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-3) },
+                new Enquiry { UserId = 1, ProductId = 1, Message = "What colors does this product come in?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-4) },
+                new Enquiry { UserId = 2, ProductId = 1, Message = "Is this product machine washable?", Status = "Pending", ReplyMessage = "", CreatedAt = DateTime.Now.AddDays(-5) }
             };
 
             context.Enquiries.AddRange(enquiries);
@@ -293,4 +296,6 @@ public class DataSeeder
             Console.WriteLine("Used discounts already exist in the database. Skipping seeding.");
         }
     }
+
+    
 }
