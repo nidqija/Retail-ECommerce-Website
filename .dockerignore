@@ -1,0 +1,15 @@
+# Windows-built outputs confuse the Linux restore/publish.
+bin/
+obj/
+
+.git/
+.vscode/
+
+# Never bake a local database into the image - the app rebuilds it on boot
+# via MigrateAsync() + DataSeeder.
+*.db
+*.db-shm
+*.db-wal
+
+admin_logs.txt
+appsettings.Development.json
